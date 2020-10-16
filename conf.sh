@@ -45,7 +45,7 @@ sudo apt --fix-broken install
 
 
 #PACOTES
-APT_PKGS=( "snapd" "flathub" "python3.8" "default-jdk" "openjdk-8-jdk" "python3-pip" "npm" "lua" "jupyter-notebook" "love" "ffmpeg" "okular" "audacity" "transmission" "firefox" "apt-transport-https" "preload" "putty" "telegram-desktop" "discord" "xclip" "nano" "dia" "krita" "inkskape" "scribus" "git" "ppa-purge" "gufw" "xz-utils" "clamav" "font-manager" "libreoffice" "retroarch" "wget" "unzip" "bash" "atom" "featherpad", "spotify-client")
+APT_PKGS=( "snapd" "flathub" "python3.8" "default-jdk" "openjdk-8-jdk" "python3-pip" "python" "python-pip" "npm" "lua" "jupyter-notebook" "love" "ffmpeg" "okular" "audacity" "transmission" "firefox" "apt-transport-https" "preload" "putty" "telegram-desktop" "discord" "xclip" "nano" "dia" "krita" "inkskape" "scribus" "git" "ppa-purge" "gufw" "xz-utils" "clamav" "font-manager" "libreoffice" "retroarch" "wget" "unzip" "bash" "atom" "featherpad", "spotify-client")
 
 )
 
@@ -76,3 +76,8 @@ if [ -d /etc/profile.d ]
 then
 	for e in ${SH_URLS[@]};do sudo wget -P /etc/profile.d $e; done
 fi
+
+
+#escolhendo versões padrão quando há alternativas
+ALTS=( "java" "python" "pip" )
+for e in ${ALTS[@]}; do sudo update-alternatives --config $e; done
