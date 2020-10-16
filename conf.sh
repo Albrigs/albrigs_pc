@@ -1,14 +1,26 @@
 #!/bin/bash
 
+ppa_exists() #remove trecho de loop se ppa já estiver instalado
+{
+	apt policy | grep $1
+	if [ $? != 0 ]; then continue ; fi
+}
+
+
 # Tirando travas do apt
 sudo rm /var/lib/dpkg/lock-frontend
 sudo rm /var/cache/apt/archives/lock
 sudo apt-key adv --recv-key --keyserver keyserver.ubuntu.com 241FE6973B765FAE
 
 #Repositórios não nativos
-PPAS=("ppa:webupd8team/atom")
+PPAS=("webupd8team/atom")
 
-for e in ${PPAS[@]}; do sudo add-apt-repository $e; done 
+for e in ${PPAS[@]} 
+do 
+ppa_exists $e
+sudo add-apt-repository ppa:${e}
+
+done 
 
 
 #arquitetura 32 bits
@@ -19,7 +31,7 @@ sudo apt --fix-broken install
 
 is_online=$(ping -c 1 -q 8.8.8.8 >&/dev/null; echo $?)
 
-if [ ! $is_online -eq 0 ]
+if [ $is_online != 0 ]
 then
 	echo "You are offline, this script will not work."
 	exit
