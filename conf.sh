@@ -24,7 +24,13 @@ sudo apt-key adv --recv-key --keyserver keyserver.ubuntu.com 241FE6973B765FAE
 
 #Repositórios não nativos
 PPAS=("webupd8team/atom")
-for e in ${PPAS[@]}; do clear;  ppa_exists $e; sudo add-apt-repository ppa:${e}; done 
+for e in ${PPAS[@]}; do clear;  ppa_exists $e; sudo sudo add-apt-repository ppa:${e}; done 
+
+apt policy | grep dart
+if [ $? != 0 ]; then
+	sudo sh -c 'wget -qO- https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -'
+	sudo sh -c 'wget -qO- https://storage.googleapis.com/download.dartlang.org/linux/debian/dart_stable.list > /etc/apt/sources.list.d/dart_stable.list'
+fi
 
 apt policy | grep spotify
 if [ $? != 0 ]; then
@@ -40,29 +46,30 @@ sudo apt --fix-broken install
 clear
 
 #PACOTES
-APT_PKGS=( "snapd" "flathub" "python3.8" "default-jdk" "openjdk-8-jdk" "python3-pip" "python" "python-pip" "npm" "lua" "jupyter-notebook" "love" "ffmpeg" "okular" "audacity" "transmission" "firefox" "apt-transport-https" "preload" "putty" "telegram-desktop" "discord" "xclip" "nano" "dia" "krita" "inkskape" "scribus" "git" "ppa-purge" "gufw" "xz-utils" "clamav" "font-manager" "libreoffice" "retroarch" "wget" "unzip" "bash" "atom" "featherpad", "spotify-client")
+APT_PKGS=( "snapd" "flathub" "python3.8" "default-jdk" "openjdk-8-jdk" "python3-pip" "python" "python-pip" "npm" "lua" "jupyter-notebook" "love" "ffmpeg" "okular" "audacity" "transmission" "firefox" "apt-transport-https" "preload" "putty" "telegram-desktop" "discord" "xclip" "nano" "dia" "krita" "inkskape" "scribus" "git" "ppa-purge" "gufw" "xz-utils" "clamav" "font-manager" "libreoffice" "retroarch" "wget" "unzip" "bash" "atom" "featherpad", "spotify-client" "dart" "steam")
 
 )
 
 PIP_PKGS=( "pyinstaller" "virtualenv" "jupyterthemes" )
 
 SNAP_PKGS=( "hugo" "insomnia" )
+NPM_PKGS=( "npx" "nextron" )
 
 #TODO Selecionar pacotes
-ATOM_PKGS=( )
+ATOM_PKGS=( "emmet" "ask-stack" "git-time-machine" "highlight-selected" "advanced-open-file" "file-icons" "pigments" "color-picker" "python-snippets" "python-jedi" "language-babel" "react-es6-snippets" "react-es7-snippets"cd "autocomplete-modules" )
 
-for e in ${SNAP_PKGS[@]}; do clear;  if ! dpkg -l | grep -q $e; then sudo apt -f -y install $e; fi; done
+FLATHUB_PKGS=( "com.github.libresprite.LibreSprite" )
+
+for e in ${APT_PKGS[@]}; do clear;  if ! dpkg -l | grep -q $e; then sudo apt -f -y install $e; fi; done
 for e in ${PIP_PKGS[@]}; do clear; sudo pip3 install $e; done
-for e in ${PIP_PKGS[@]}; do clear; sudo snap install $e; done
+for e in ${SNAP_PKGS[@]}; do clear; sudo snap install $e; done
 for e in ${ATOM_PKGS[@]}; do clear; apm install $e; done
-clear
+flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo; clear
+for e in ${FLATHUB_PKGS[@]}; do clear; flatpak install -y flathub $e; done
+for e in ${NPM_PKGS[@]}; do clear; sudo npm i -g $e; done; clear
 
-flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-flatpak install -y flathub com.github.libresprite.LibreSprite
-clear
+sudo curl -fsSL https://deno.land/x/install/install.sh | sh; clear
 
-sudo curl -fsSL https://deno.land/x/install/install.sh | sh
-clear
 
 #Adicionando shells que serão carregados no login.
 #TODO Adicionar
@@ -80,8 +87,6 @@ for e in ${ALTS[@]}; do clear; sudo update-alternatives --config $e; done
 #Meu GYT
 if [ -f master.zip ]; then rm master.zip ; fi
 wget https://github.com/Albrigs/gyt/archive/master.zip
-unzip master.zip
-rm master.zip
+unzip master.zip; rm master.zip
 sudo pip3 install e gyt-master
 sudo rm -r gyt-master
-
