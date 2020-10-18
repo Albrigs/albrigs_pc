@@ -58,7 +58,9 @@ NPM_PKGS=( "npx" "nextron" )
 #TODO Selecionar pacotes
 ATOM_PKGS=( "emmet" "ask-stack" "git-time-machine" "highlight-selected" "advanced-open-file" "file-icons" "pigments" "color-picker" "python-snippets" "python-jedi" "language-babel" "react-es6-snippets" "react-es7-snippets" "autocomplete-modules" "data-atom" )
 
-FLATHUB_PKGS=( "com.github.libresprite.LibreSprite" )
+FLATHUB_PKGS=( 
+"com.github.libresprite.LibreSprite"
+)
 
 for e in ${APT_PKGS[@]}; do clear;  if ! dpkg -l | grep -q $e; then sudo apt -f -y install $e; fi; done
 for e in ${PIP_PKGS[@]}; do clear; sudo pip3 install $e; done
@@ -73,7 +75,9 @@ sudo curl -fsSL https://deno.land/x/install/install.sh | sh; clear
 
 #Adicionando shells que serão carregados no login.
 #TODO Adicionar
-SH_URLS=()
+SH_URLS=(
+ "https://raw.githubusercontent.com/Albrigs/albrigs_pc/master/login_files/custom_path.sh"
+)
 if [ -d /etc/profile.d ]
 then
 	for e in ${SH_URLS[@]};do clear; sudo wget -P /etc/profile.d $e; done
