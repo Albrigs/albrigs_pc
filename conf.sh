@@ -56,7 +56,7 @@ SNAP_PKGS=( "hugo" "insomnia" )
 NPM_PKGS=( "npx" "nextron" )
 
 #TODO Selecionar pacotes
-ATOM_PKGS=( "emmet" "ask-stack" "git-time-machine" "highlight-selected" "advanced-open-file" "file-icons" "pigments" "color-picker" "python-snippets" "python-jedi" "language-babel" "react-es6-snippets" "react-es7-snippets"cd "autocomplete-modules" )
+ATOM_PKGS=( "emmet" "ask-stack" "git-time-machine" "highlight-selected" "advanced-open-file" "file-icons" "pigments" "color-picker" "python-snippets" "python-jedi" "language-babel" "react-es6-snippets" "react-es7-snippets" "autocomplete-modules" "data-atom" )
 
 FLATHUB_PKGS=( "com.github.libresprite.LibreSprite" )
 
