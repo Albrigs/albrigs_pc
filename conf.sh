@@ -76,7 +76,7 @@ sudo curl -fsSL https://deno.land/x/install/install.sh | sh; clear
 #Adicionando shells que serão carregados no login.
 #TODO Adicionar
 SH_URLS=(
- "https://raw.githubusercontent.com/Albrigs/albrigs_pc/master/login_files/custom_path.sh"
+ "https://raw.githubusercontent.com/Albrigs/albrigs_pc/main/login_files/custom_path.sh"
 )
 if [ -d /etc/profile.d ]
 then
