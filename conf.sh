@@ -24,7 +24,7 @@ sudo apt-key adv --recv-key --keyserver keyserver.ubuntu.com 241FE6973B765FAE
 
 
 #Repositórios não nativos
-PPAS=("webupd8team/atom")
+PPAS=("webupd8team/atom" "lutris-team/lutris")
 for e in ${PPAS[@]}; do clear;  PPA_EXISTS $e; sudo sudo add-apt-repository ppa:${e}; done 
 
 apt policy | grep dart
@@ -51,7 +51,7 @@ APT_INSTALL()
 }
 
 #PACOTES
-APT_PKGS=( "snapd" "flathub" "python3.8" "default-jdk" "openjdk-8-jdk" "python3-pip" "python" "python-pip" "npm" "lua" "jupyter-notebook" "love" "ffmpeg" "okular" "audacity" "transmission" "firefox" "apt-transport-https" "preload" "putty" "telegram-desktop" "discord" "xclip" "nano" "dia" "krita" "git" "ppa-purge" "gufw" "xz-utils" "clamav" "font-manager" "retroarch" "wget" "unzip" "bash" "featherpad", "spotify-client" "dart" "steam")
+APT_PKGS=( "snapd" "flathub" "python3.8" "default-jdk" "openjdk-8-jdk" "python3-pip" "python" "python-pip" "npm" "lua" "jupyter-notebook" "love" "ffmpeg" "okular" "audacity" "transmission" "firefox" "apt-transport-https" "preload" "putty" "telegram-desktop" "discord" "xclip" "nano" "dia" "krita" "git" "ppa-purge" "gufw" "xz-utils" "clamav" "font-manager" "retroarch" "wget" "unzip" "bash" "featherpad", "spotify-client" "dart" )
 PIP_PKGS=( "pyinstaller" "virtualenv" "jupyterthemes" )
 SNAP_PKGS=( "hugo" "insomnia" )
 NPM_PKGS=( "npx" "nextron" )
@@ -126,12 +126,18 @@ if [ $ROOT_SIZE -lt 100 ]; then
 	
 	
 else
-	# Se meu root for maior vai instalar atom
-	APT_INSTALL atom
+	# Se meu root for maior vai instalar pacotes pesados
+	wget -nc https://dl.winehq.org/wine-builds/winehq.key
+	sudo apt-key add winehq.key
+	VERSION=$( cat /etc/os-release | grep VERSION_CODENAME | cut -d "=" -f 2 )
+	sudo add-apt-repository "deb https://dl.winehq.org/wine-builds/ubuntu/ ${VERSION} main"
+	clear; sudo apt update; clear
+	sudo apt install --install-recommends winehq-stable 
+
+	HEAVY_PKGS=( "atom" "libreoffice" "lutris" "steam" )	
+	for e in ${HEAVY_PKGS}; do APT_INSTALL $e; done
 	
 	ATOM_PKGS=( "emmet" "ask-stack" "git-time-machine" "highlight-selected" "advanced-open-file" "file-icons" "pigments" "color-picker" "python-snippets" "python-jedi" "language-babel" "react-es6-snippets" "react-es7-snippets" "autocomplete-modules" "data-atom" "love-ide" )
 	for e in ${ATOM_PKGS[@]}; do clear; apm install $e; done
-	
-	#libre-office apenas quando tem mais espaço
-	APT_INSTALL libreoffice
+
 fi
