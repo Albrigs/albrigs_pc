@@ -107,6 +107,24 @@ if [ $ROOT_SIZE -lt 100 ]; then
 	else
 		APT_INSTALL sublime-text
 	fi
+	
+	SUBLIME_FOLDER="~/.config/sublime-text-3/Packages/"
+	SUBL_PACKAGES=(
+		"https://github.com/braver/ColorHints/archive/master.zip"
+		"https://github.com/braver/FileIcons/archive/master.zip"
+		"https://github.com/Wramberg/TerminalView/archive/master.zip"
+		"https://github.com/kiteco/KiteSublime/archive/master.zip"
+		"https://github.com/sergeche/emmet-sublime/archive/master.zip"
+		"https://github.com/jugyo/SublimeColorSchemeSelector/archive/master.zip"
+		"https://github.com/titoBouzout/SideBarEnhancements/archive/st3.zip"
+		"https://github.com/skuroda/Sublime-AdvancedNewFile/archive/master.zip"
+	)
+		
+	for e in ${SUBL_PACKAGES[@]}; do wget -P $SUBLIME_FOLDER $e; done
+	unzip "${SUBLIME_FOLDER}/*.zip" 
+	sudo rm -r "${SUBLIME_FOLDER}/*.zip"
+	
+	
 else
 	# Se meu root for maior vai instalar atom
 	APT_INSTALL atom
