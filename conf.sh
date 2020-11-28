@@ -2,6 +2,8 @@
 
 #Script só inicia se estiver conectado a internet
 is_online=$(ping -c 1 -q 8.8.8.8 >&/dev/null; echo $?)
+
+
 if [ $is_online != 0 ]
 then
 	echo "You are offline, this script will not work."
@@ -27,11 +29,13 @@ sudo apt-key adv --recv-key --keyserver keyserver.ubuntu.com 241FE6973B765FAE
 PPAS=("webupd8team/atom" "lutris-team/lutris")
 for e in ${PPAS[@]}; do clear;  PPA_EXISTS $e; sudo sudo add-apt-repository ppa:${e}; done 
 
+
 apt policy | grep dart
 if [ $? != 0 ]; then
 	sudo sh -c 'wget -qO- https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -'
 	sudo sh -c 'wget -qO- https://storage.googleapis.com/download.dartlang.org/linux/debian/dart_stable.list > /etc/apt/sources.list.d/dart_stable.list'
 fi
+
 
 apt policy | grep spotify
 if [ $? != 0 ]; then
@@ -39,25 +43,29 @@ if [ $? != 0 ]; then
 	echo "deb http://repository.spotify.com stable non-free" | sudo tee /etc/apt/sources.list.d/spotify.list
 fi
 
+
 #arquitetura 32 bits
 sudo dpkg --add-architecture i386
 sudo apt update; sudo apt upgrade
 sudo apt --fix-broken install
 clear
 
+
 APT_INSTALL()
 {
 	clear;  if ! dpkg -l | grep -q $1; then sudo apt -f -y install $1; fi
 }
 
+
 #PACOTES
-APT_PKGS=( "snapd" "flathub" "python3.8" "default-jdk" "openjdk-8-jdk" "python3-pip" "python" "python-pip" "npm" "lua" "jupyter-notebook" "love" "ffmpeg" "okular" "audacity" "transmission" "firefox" "apt-transport-https" "preload" "putty" "telegram-desktop" "discord" "xclip" "nano" "dia" "krita" "git" "ppa-purge" "gufw" "xz-utils" "clamav" "font-manager" "retroarch" "wget" "unzip" "bash" "featherpad", "spotify-client" "dart" )
+APT_PKGS=( "snapd" "flathub" "python3.8" "default-jdk" "openjdk-8-jdk" "python3-pip" "python" "python-pip" "npm" "lua" "jupyter-notebook" "love" "ffmpeg" "okular" "audacity" "transmission" "firefox" "apt-transport-https" "preload" "putty" "telegram-desktop" "discord" "xclip" "nano" "dia" "krita" "git" "ppa-purge" "gufw" "xz-utils" "clamav" "font-manager" "retroarch" "wget" "unzip" "bash" "featherpad", "spotify-client" "dart" "sed")
 PIP_PKGS=( "pyinstaller" "virtualenv" "jupyterthemes" )
 SNAP_PKGS=( "hugo" "insomnia" )
 NPM_PKGS=( "npx" "nextron" )
 FLATHUB_PKGS=( 
 "com.github.libresprite.LibreSprite"
 )
+
 
 for e in ${APT_PKGS[@]}; APT_INSTALL $e; done
 for e in ${PIP_PKGS[@]}; do clear; sudo pip3 install $e; done
@@ -66,7 +74,14 @@ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flat
 for e in ${FLATHUB_PKGS[@]}; do clear; flatpak install -y flathub $e; done
 for e in ${NPM_PKGS[@]}; do clear; sudo npm i -g $e; done; clear
 
+
 sudo curl -fsSL https://deno.land/x/install/install.sh | sh; clear
+
+
+#navegador min
+wget https://github.com/minbrowser/min/releases/download/v1.17.1/min_1.17.1_amd64.deb
+sudo dpkg -i min_1.17.1_amd64.deb
+sudo rm -r min_1.17.1_amd64.deb
 
 
 #Adicionando shells que serão carregados no login.
@@ -74,15 +89,34 @@ sudo curl -fsSL https://deno.land/x/install/install.sh | sh; clear
 SH_URLS=(
  "https://raw.githubusercontent.com/Albrigs/albrigs_pc/main/login_files/custom_path.sh"
 )
-if [ -d /etc/profile.d ]
-then
+if [ -d /etc/profile.d ]; then
 	for e in ${SH_URLS[@]};do clear; sudo wget -P /etc/profile.d $e; done
 fi
 
 
+SH_COMMANDS=(
+	"https://raw.githubusercontent.com/Albrigs/albrigs_pc/main/command_files/marktext"
+)
+if [ -d /usr/bin ]; then
+	for e in ${SH_COMMANDS[@]};do 
+		clear 
+		sudo wget -P /usr/bin $e;
+		FILE_NAME=$(echo $e | cut -d "/" -f 8)
+		sudo chmod -x "/usr/bin/$FILE_NAME"
+	done	
+fi
+
 #escolhendo versões padrão quando há alternativas
-ALTS=( "java" "python" "pip" )
+ALTS=( "java" "python" "pip" "x-www-browser" )
 for e in ${ALTS[@]}; do clear; sudo update-alternatives --config $e; done
+
+
+#Visualizador de DBS
+wget https://dbvis.com/product_download/dbvis-11.0.5/media/dbvis_linux_11_0_5.sh -O dbvis.sh
+chmod a+x dbvis.sh
+./dbvis.sh
+rm dbvis.sh
+
 
 #Meu GYT
 if [ -f master.zip ]; then rm master.zip ; fi
@@ -91,8 +125,20 @@ unzip master.zip; rm master.zip
 sudo pip3 install e gyt-master
 sudo rm -r gyt-master
 
-#Text Editor
 
+#Marktext
+wget https://github.com/marktext/marktext/releases/latest/download/marktext-x86_64.AppImage
+chmod +x marktext*.AppImage
+curl -L https://raw.githubusercontent.com/marktext/marktext/develop/resources/linux/marktext.desktop -o $HOME/.local/share/applications/marktext.desktop
+PATH_FILE=$(ls marktext*)
+PATH_FILE="$HOME/$PATH_FILE"
+sed -i "s|marktext %F|$PATH_FILE|g" $HOME/.local/share/applications/marktext.desktop
+sed -i "s|%F|$PATH_FILE|g" $HOME/.local/share/applications/marktext.desktop
+
+update-desktop-database $HOME/.local/share/applications/
+
+
+#Heavy thins
 ROOT_SIZE=$(df | grep "/$" | cut -d " " -f 3)
 ROOT_SIZE=$(echo $(($ROOT_SIZE/1000000)))
 
@@ -119,12 +165,12 @@ if [ $ROOT_SIZE -lt 100 ]; then
 		"https://github.com/titoBouzout/SideBarEnhancements/archive/st3.zip"
 		"https://github.com/skuroda/Sublime-AdvancedNewFile/archive/master.zip"
 	)
-		
+
+
 	for e in ${SUBL_PACKAGES[@]}; do wget -P $SUBLIME_FOLDER $e; done
 	unzip "${SUBLIME_FOLDER}/*.zip" 
 	sudo rm -r "${SUBLIME_FOLDER}/*.zip"
-	
-	
+
 else
 	# Se meu root for maior vai instalar pacotes pesados
 	wget -nc https://dl.winehq.org/wine-builds/winehq.key
@@ -134,9 +180,11 @@ else
 	clear; sudo apt update; clear
 	sudo apt install --install-recommends winehq-stable 
 
+
 	HEAVY_PKGS=( "atom" "libreoffice" "lutris" "steam" )	
 	for e in ${HEAVY_PKGS}; do APT_INSTALL $e; done
-	
+
+
 	ATOM_PKGS=( "emmet" "ask-stack" "git-time-machine" "highlight-selected" "advanced-open-file" "file-icons" "pigments" "color-picker" "python-snippets" "python-jedi" "language-babel" "react-es6-snippets" "react-es7-snippets" "autocomplete-modules" "data-atom" "love-ide" )
 	for e in ${ATOM_PKGS[@]}; do clear; apm install $e; done
 
