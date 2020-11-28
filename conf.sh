@@ -64,6 +64,7 @@ SNAP_PKGS=( "hugo" "insomnia" )
 NPM_PKGS=( "npx" "nextron" )
 FLATHUB_PKGS=( 
 "com.github.libresprite.LibreSprite"
+"flathub com.github.marktext.marktext"
 )
 
 
@@ -95,7 +96,7 @@ fi
 
 
 SH_COMMANDS=(
-	"https://raw.githubusercontent.com/Albrigs/albrigs_pc/main/command_files/marktext"
+	"https://raw.githubusercontent.com/Albrigs/albrigs_pc/main/command_files/update_all"
 )
 if [ -d /usr/bin ]; then
 	for e in ${SH_COMMANDS[@]};do 
@@ -124,18 +125,6 @@ wget https://github.com/Albrigs/gyt/archive/master.zip
 unzip master.zip; rm master.zip
 sudo pip3 install e gyt-master
 sudo rm -r gyt-master
-
-
-#Marktext
-wget https://github.com/marktext/marktext/releases/latest/download/marktext-x86_64.AppImage
-chmod +x marktext*.AppImage
-curl -L https://raw.githubusercontent.com/marktext/marktext/develop/resources/linux/marktext.desktop -o $HOME/.local/share/applications/marktext.desktop
-PATH_FILE=$(ls marktext*)
-PATH_FILE="$HOME/$PATH_FILE"
-sed -i "s|marktext %F|$PATH_FILE|g" $HOME/.local/share/applications/marktext.desktop
-sed -i "s|%F|$PATH_FILE|g" $HOME/.local/share/applications/marktext.desktop
-
-update-desktop-database $HOME/.local/share/applications/
 
 
 #Heavy thins
