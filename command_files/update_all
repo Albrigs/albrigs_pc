@@ -1,4 +1,4 @@
 sudo apt update
 sudo apt upgrade
-flatpak update
-snap refresh
+sudo flatpak update
+sudo snap refresh

@@ -97,6 +97,7 @@ fi
 
 SH_COMMANDS=(
 	"https://raw.githubusercontent.com/Albrigs/albrigs_pc/main/command_files/update_all"
+	"https://raw.githubusercontent.com/Albrigs/albrigs_pc/main/command_files/clear_all"
 )
 if [ -d /usr/bin ]; then
 	for e in ${SH_COMMANDS[@]};do 
