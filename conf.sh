@@ -26,7 +26,7 @@ sudo apt-key adv --recv-key --keyserver keyserver.ubuntu.com 241FE6973B765FAE
 
 
 #Repositórios não nativos
-PPAS=("webupd8team/atom" "lutris-team/lutris")
+PPAS=("webupd8team/atom" "lutris-team/lutris" "oguzhaninan/stacer")
 for e in ${PPAS[@]}; do clear;  PPA_EXISTS $e; sudo sudo add-apt-repository ppa:${e}; done 
 
 
@@ -57,8 +57,21 @@ APT_INSTALL()
 }
 
 
+#Necessidades no GalliumOS
+uname -or | grep galliu
+if [ $? != 0 ]; then
+	PKGS_SMOL=( "lightdm" "xfwm4" )
+	PKGS_REMOVE=( "lxdm" "chromiu*" "appgrid" "audaciou*" "atri*" )
+	
+	for e in ${PKGS_SMOL[@]}; do APT_INSTALL $e; done
+	for e in ${PKGS_REMOVE[@]}; do sudo apt remove -y $e; done
+# bspwm herbstluftwm
+
+fi
+
+
 #PACOTES
-APT_PKGS=( "snapd" "flathub" "python3.8" "default-jdk" "openjdk-8-jdk" "python3-pip" "python" "python-pip" "npm" "lua" "jupyter-notebook" "love" "ffmpeg" "okular" "audacity" "transmission" "firefox" "apt-transport-https" "preload" "putty" "telegram-desktop" "discord" "xclip" "nano" "dia" "krita" "git" "ppa-purge" "gufw" "xz-utils" "clamav" "font-manager" "retroarch" "wget" "unzip" "bash" "featherpad", "spotify-client" "dart" "sed")
+APT_PKGS=( "snapd" "flathub" "python3.8" "default-jdk" "openjdk-8-jdk" "python3-pip" "python" "python-pip" "npm" "lua" "jupyter-notebook" "love" "ffmpeg" "okular" "audacity" "transmission" "firefox" "apt-transport-https" "preload" "putty" "telegram-desktop" "discord" "xclip" "nano" "dia" "krita" "git" "ppa-purge" "gufw" "xz-utils" "clamav" "font-manager" "retroarch" "wget" "unzip" "bash" "featherpad", "spotify-client" "dart" "sed" "stacer" )
 PIP_PKGS=( "pyinstaller" "virtualenv" "jupyterthemes" )
 SNAP_PKGS=( "hugo" "insomnia" )
 NPM_PKGS=( "npx" "nextron" )
@@ -100,13 +113,16 @@ SH_COMMANDS=(
 	"https://raw.githubusercontent.com/Albrigs/albrigs_pc/main/command_files/clear_all"
 )
 if [ -d /usr/bin ]; then
-	for e in ${SH_COMMANDS[@]};do 
-		clear 
+	for e in ${SH_COMMANDS[@]};do
+		clear
 		sudo wget -P /usr/bin $e;
 		FILE_NAME=$(echo $e | cut -d "/" -f 8)
 		sudo chmod -x "/usr/bin/$FILE_NAME"
-	done	
+	done
 fi
+
+#Alterar tema jupyter
+jt -t chesterish
 
 #escolhendo versões padrão quando há alternativas
 ALTS=( "java" "python" "pip" "x-www-browser" )
@@ -138,12 +154,12 @@ if [ $ROOT_SIZE -lt 100 ]; then
 	wait $!
 	echo $HAS_SUBLIME | grep sublime-text
 
-	if [ $? != 0 ] then 
+	if [ $? != 0 ] then
 		sudo snap install sublime-text --classic
 	else
 		APT_INSTALL sublime-text
 	fi
-	
+
 	SUBLIME_FOLDER="~/.config/sublime-text-3/Packages/"
 	SUBL_PACKAGES=(
 		"https://github.com/braver/ColorHints/archive/master.zip"
@@ -161,6 +177,7 @@ if [ $ROOT_SIZE -lt 100 ]; then
 	unzip "${SUBLIME_FOLDER}/*.zip" 
 	sudo rm -r "${SUBLIME_FOLDER}/*.zip"
 
+
 else
 	# Se meu root for maior vai instalar pacotes pesados
 	wget -nc https://dl.winehq.org/wine-builds/winehq.key
@@ -168,10 +185,10 @@ else
 	VERSION=$( cat /etc/os-release | grep VERSION_CODENAME | cut -d "=" -f 2 )
 	sudo add-apt-repository "deb https://dl.winehq.org/wine-builds/ubuntu/ ${VERSION} main"
 	clear; sudo apt update; clear
-	sudo apt install --install-recommends winehq-stable 
+	sudo apt install --install-recommends winehq-stable
 
 
-	HEAVY_PKGS=( "atom" "libreoffice" "lutris" "steam" )	
+	HEAVY_PKGS=( "atom" "libreoffice" "lutris" "steam" )
 	for e in ${HEAVY_PKGS}; do APT_INSTALL $e; done
 
 

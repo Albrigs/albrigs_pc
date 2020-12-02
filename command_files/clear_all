@@ -6,3 +6,17 @@ sudo apt autoremove
 sudo apt-get clean
 sudo rm /var/lib/snapd/cache/*
 sudo flatpak uninstall --unused
+sudo journalctl --vacuum-time=3d
+
+set -eu
+snap list --all | awk '/disabled/{print $1, $3}' |
+    while read snapname revision; do
+        snap remove "$snapname" --revision="$revision"
+    done
+
+
+snap list --all | awk '/disabled/{print $1, $3}' | while read snapname revision; do
+	sudo snap remove "$snapname" --revision="$revision"
+done
+
+sudo rm -rf ~/.cache/thumbnails/*
