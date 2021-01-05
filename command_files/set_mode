@@ -1,0 +1,112 @@
+#!/bin/bash
+
+clear
+
+desktop_num=$(xdotool get_num_desktops)
+
+open_if_not_open(){
+	xdotool search --class $1
+	if [ $? != 0 ]; then $1; fi
+}
+
+kill_windows(){
+	TERMINALS=$(xdotool search --class term* getwindowpid)
+	DISCORD=$(xdotool search --class discord getwindowpid)
+	SPOTIFY=$(xdotool search --class spotify getwindowpid)
+	ALL_WINDOWS=$(xdotool search "" windowkill %@ getwindowpid)
+
+	for e in ALL_WINDOWS; do
+		if [ *"$e"* != $DISCORD ] && [ *"$e"* != $TERMINALS ] && [ *"$e"* != $SPOTIFY ]; then
+			kill $e
+		fi
+	then
+
+	clear
+}
+
+
+
+tormenta_time(){
+	T20='$HOME/Doc*/T20.pdf'
+	if [ -f $HOME/Doc*/T20.pdf ]; then
+		xdotool set_num_desktops 2
+		kill_windows
+		open_if_not_open discord
+
+		xdotool set_desktop 1
+		okular $T20
+
+		sleep 2
+		
+		xdotool set_desktop 0
+		firefox 'https://roll20.net/'
+
+		sleep 2
+
+		xdotool set_desktop 0
+	else
+		echo "Baixar ou renomear o PDF para T20.pdf e colocar em $T20"
+	fi
+}
+
+
+prime_time(){
+	xdotool set_num_desktops 1
+	kill_windows
+	firefox "https://www.primevideo.com/"
+}
+
+
+code_time(){
+	xdotool set_num_desktops 2
+	kill_windows
+
+	xdotool set_desktop 0
+	which subl
+	if [ $? != 0 ]; then subl; fi
+
+	which atom
+	if [ $? != 0 ]; then atom; fi
+
+	sleep 2
+
+	xdotool set_desktop 1
+	firefox
+	open_if_not_open spotify
+
+	sleep 2
+
+	xdotool set_desktop 0
+}
+
+
+drawn_time(){
+	xdotool set_num_desktops 2
+	kill_windows
+
+	xdotool set_desktop 0
+	open_if_not_open krita
+
+	sleep 2
+
+	xdotool set_desktop 1
+	open_if_not_open spotify
+	firefox
+	
+	sleep 2
+	
+	xdotool set_desktop 0
+}
+
+
+case $1 in
+	help)echo Ajuda;;
+	tormenta)tormenta_time;;
+	code)code_time;;
+	prime) prime_time;;
+	desenhar) drawn_time;;
+	*)echo "Opção inválida, use set_mode help para mais informações.";;
+esac
+
+
+# firefox --new-tab --url url

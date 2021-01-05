@@ -71,7 +71,7 @@ fi
 
 
 #PACOTES
-APT_PKGS=( "sqlitebrowser" "snapd" "flathub" "python3.8" "default-jdk" "openjdk-8-jdk" "python3-pip" "python" "python-pip" "npm" "lua" "jupyter-notebook" "love" "ffmpeg" "okular" "audacity" "transmission" "firefox" "apt-transport-https" "preload" "putty" "telegram-desktop" "discord" "xclip" "nano" "dia" "krita" "git" "ppa-purge" "gufw" "xz-utils" "clamav" "font-manager" "retroarch" "wget" "unzip" "bash" "featherpad", "spotify-client" "dart" "sed" "stacer" )
+APT_PKGS=( "sqlitebrowser" "wmctrl" "xdotool" "snapd" "flathub" "python3.8" "default-jdk" "openjdk-8-jdk" "python3-pip" "python" "python-pip" "npm" "lua" "jupyter-notebook" "love" "ffmpeg" "okular" "audacity" "transmission" "firefox" "apt-transport-https" "preload" "putty" "telegram-desktop" "discord" "xclip" "nano" "dia" "krita" "git" "ppa-purge" "gufw" "xz-utils" "clamav" "font-manager" "retroarch" "wget" "unzip" "bash" "featherpad", "spotify-client" "dart" "sed" "stacer" )
 PIP_PKGS=( "pyinstaller" "virtualenv" "jupyterthemes" )
 SNAP_PKGS=( "hugo" "insomnia" )
 NPM_PKGS=( "npx" "nextron" )
@@ -88,6 +88,10 @@ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flat
 for e in ${FLATHUB_PKGS[@]}; do clear; flatpak install -y flathub $e; done
 for e in ${NPM_PKGS[@]}; do clear; sudo npm i -g $e; done; clear
 
+which discord
+if [ $? != 0 ]; then
+	sudo snap install discord
+fi
 
 sudo curl -fsSL https://deno.land/x/install/install.sh | sh; clear
 
