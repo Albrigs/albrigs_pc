@@ -1,3 +1,8 @@
+if [ $(id -u) != 0 ]; then
+	echo "Please run this script as ROOT."
+	exit
+fi
+
 sudo apt update
 sudo apt upgrade
 sudo flatpak update

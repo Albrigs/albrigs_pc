@@ -1,5 +1,11 @@
 #!/bin/bash
 
+if [ $(id -u) != 0 ]; then
+	echo "Please run this script as ROOT."
+	exit
+fi
+
+
 #Remove folders with 7 or more days
 sudo find /tmp -type f -atime +7 -delete
 
