@@ -44,12 +44,12 @@ GDEBI_INSTALL()
 
 }
 
-PROJECT_URL="https://raw.githubusercontent.com/Albrigs/albrigs_pc/"
+PROJECT_URL="https://raw.githubusercontent.com/Albrigs/albrigs_pc/main/"
 PACKAGES_URL="${PROJECT_URL}pkgs/"
 
 GET_PACKAGES()
 {
-	RESPONSE=$(curl "${PACKAGES_URL}${1}")
+	RESPONSE=$(curl -sS "${PACKAGES_URL}${1}")
 	wait $!
 	echo $RESPONSE
 	return
