@@ -44,6 +44,26 @@ GDEBI_INSTALL()
 
 }
 
+PROJECT_URL="https://raw.githubusercontent.com/Albrigs/albrigs_pc/"
+PACKAGES_URL="${PROJECT_URL}pkgs/"
+
+GET_PACKAGES()
+{
+	RESPONSE=$(curl "${PACKAGES_URL}${1}")
+	wait $!
+	echo $RESPONSE
+	return
+}
+
+ADD_APT_PKG()
+{
+	#1 = pkg name
+	#2 = URL key
+	#3 = URL of deb
+	curl -sS $2 | sudo tee "/etc/apt/sources.list.d/${1}.list"
+	echo "deb ${3}" | sudo apt-key add - 
+}
+
 
 # Tirando travas do apt
 sudo rm /var/lib/dpkg/lock-frontend
@@ -57,22 +77,19 @@ for e in ${PPAS[@]}; do clear;  PPA_EXISTS $e; sudo sudo add-apt-repository ppa:
 
 #Spotfy
 if [ "$(PKG_IN_APT spotify)" != 0 ]; then
-	curl -sS https://download.spotify.com/debian/pubkey_0D811D58.gpg | sudo apt-key add - 
-	echo "deb http://repository.spotify.com stable non-free" | sudo tee /etc/apt/sources.list.d/spotify.list
+	ADD_APT_PKG 'spotify' 'https://download.spotify.com/debian/pubkey_0D811D58.gpg' 'http://repository.spotify.com stable non-free'
 fi
 
 #Sublime Text
 if [ "$(PKG_IN_APT sublime-text)" != 0 ] then
-	wget -qO - https://download.sublimetext.com/sublimehq-pub.gpg | sudo apt-key add -
-	echo "deb https://download.sublimetext.com/ apt/stable/" | sudo tee /etc/apt/sources.list.d/sublime-text.list
+	ADD_APT_PKG 'sublime-text' 'https://download.sublimetext.com/sublimehq-pub.gpg' 'https://download.sublimetext.com/ apt/stable/'
 fi 
 
 #Insomnia
 if [ "$(PKG_IN_APT insomnia)" != 0 ] then
-	echo "deb https://dl.bintray.com/getinsomnia/Insomnia /" | sudo tee -a /etc/apt/sources.list.d/insomnia.list
-	wget --quiet -O - https://insomnia.rest/keys/debian-public.key.asc | sudo apt-key add -
-
+	ADD_APT_PKG 'insomnia' 'https://insomnia.rest/keys/debian-public.key.asc' 'https://dl.bintray.com/getinsomnia/Insomnia /'
 fi 
+
 
 ##
 #if [ "$(PKG_IN_APT )" != 0 ] then
@@ -84,27 +101,12 @@ sudo apt update; sudo apt upgrade
 sudo apt --fix-broken install
 clear
 
-#Necessidades no GalliumOS
-uname -or | grep galliu
-if [ $? != 0 ]; then
-	PKGS_SMOL=( "lightdm" "xfwm4" )
-	PKGS_REMOVE=( "lxdm" "appgrid" "audaciou*" "atri*" )
-	
-	for e in ${PKGS_SMOL[@]}; do APT_INSTALL $e; done
-	for e in ${PKGS_REMOVE[@]}; do sudo apt remove -y $e; done
-# bspwm herbstluftwm
-
-fi
-
 
 #PACOTES
-APT_PKGS=( "gdebi" "insomnia" "sublime-text" "sqlitebrowser" "wmctrl" "xdotool" "flathub" "nodejs" "python3.8" "default-jdk" "openjdk-8-jdk" "python3-pip" "python" "python-pip" "npm" "lua" "jupyter-notebook" "love" "ffmpeg" "okular" "audacity" "transmission" "firefox" "apt-transport-https" "preload" "putty" "telegram-desktop" "discord" "xclip" "nano" "dia" "krita" "git" "ppa-purge" "gufw" "xz-utils" "clamav" "font-manager" "retroarch" "wget" "unzip" "bash" "featherpad", "spotify-client" "dart" "sed" "stacer" )
-PIP_PKGS=( "pyinstaller" "virtualenv" "jupyterthemes" )
-NPM_PKGS=( "npx" "nextron" )
-FLATHUB_PKGS=( 
-"com.github.libresprite.LibreSprite"
-"com.github.marktext.marktext"
-)
+APT_PKGS=$({ GET_PACKAGES apt_basic & GET_PACKAGES apt_net & GET_PACKAGES apt_media & GET_PACKAGES apt_dev; })
+PIP_PKGS=$(GET_PACKAGES pip)
+NPM_PKGS=$(GET_PACKAGES npm)
+FLATHUB_PKGS=$(GET_PACKAGES flathub)
 
 
 for e in ${APT_PKGS[@]}; APT_INSTALL $e; done
@@ -114,36 +116,28 @@ for e in ${FLATHUB_PKGS[@]}; do clear; flatpak install -y flathub $e; done
 for e in ${NPM_PKGS[@]}; do clear; sudo npm i -g $e; done; clear
 
 #Discord
-wget -O ~/discord.deb "https://discordapp.com/api/download?platform=linux&format=deb"
-sudo gdebi -n ~/discord.deb 
-sudo rm -r ~/discord.deb
-
-
+GDEBI_INSTALL "discord" "https://discordapp.com/api/download?platform=linux&format=deb"
 
 #navegador min
-wget -O ~/min.deb "https://github.com/minbrowser/min/releases/download/v1.17.1/min_1.17.1_amd64.deb"
-sudo gdebi -n -i ~/min.deb
-sudo rm -r ~/min.deb
+GDEBI_INSTALL "min" "https://github.com/minbrowser/min/releases/download/v1.17.1/min_1.17.1_amd64.deb"
 
 #DENO
 sudo curl -fsSL https://deno.land/x/install/install.sh | sh; clear
 
 
-
-
 #Adicionando shells que serão carregados no login.
 #TODO Adicionar
 SH_URLS=(
- "https://raw.githubusercontent.com/Albrigs/albrigs_pc/main/login_files/custom_path.sh"
+ "${PROJECT_URL}login_files/custom_path.sh"
 )
 if [ -d /etc/profile.d ]; then
 	for e in ${SH_URLS[@]};do clear; sudo wget -P /etc/profile.d $e; done
 fi
 
-
+COMMAND_URL="${PROJECT_URL}command_files/"
 SH_COMMANDS=(
-	"https://raw.githubusercontent.com/Albrigs/albrigs_pc/main/command_files/update_all"
-	"https://raw.githubusercontent.com/Albrigs/albrigs_pc/main/command_files/clear_all"
+	"${COMMAND_URL}update_all"
+	"${COMMAND_URL}clear_all"
 )
 if [ -d /usr/bin ]; then
 	for e in ${SH_COMMANDS[@]};do
@@ -160,13 +154,6 @@ jt -t chesterish
 #escolhendo versões padrão quando há alternativas
 ALTS=( "java" "python" "pip" "x-www-browser" )
 for e in ${ALTS[@]}; do clear; sudo update-alternatives --config $e; done
-
-
-#Visualizador de DBS
-wget https://dbvis.com/product_download/dbvis-11.0.5/media/dbvis_linux_11_0_5.sh -O dbvis.sh
-chmod a+x dbvis.sh
-./dbvis.sh
-rm dbvis.sh
 
 
 #Meu GYT
@@ -190,6 +177,6 @@ if [ $ROOT_SIZE -gt 100 ]; then
 	clear; sudo apt update -y; clear
 	sudo apt install -y --install-recommends winehq-stable
 
-	HEAVY_PKGS=( "libreoffice" "lutris" "steam" )
+	HEAVY_PKGS=$(GET_PACKAGES apt_heavy)
 	for e in ${HEAVY_PKGS}; do APT_INSTALL $e; done
 fi
