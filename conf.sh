@@ -170,11 +170,9 @@ ROOT_SIZE=$(echo $(($ROOT_SIZE/1000000)))
 
 if [ $ROOT_SIZE -gt 100 ]; then
 	# Se meu root for maior vai instalar pacotes pesados
-	wget -nc https://dl.winehq.org/wine-builds/winehq.key
-	sudo apt-key add winehq.key
-	VERSION=$( cat /etc/os-release | grep VERSION_CODENAME | cut -d "=" -f 2 )
-	sudo add-apt-repository "deb https://dl.winehq.org/wine-builds/ubuntu/ ${VERSION} main"
-	clear; sudo apt update -y; clear
+	WINE_PPA="deb https://dl.winehq.org/wine-builds/ubuntu/ ${VERSION} main"
+	ADD_APT_PKG 'winehq' "https://dl.winehq.org/wine-builds/winehq.key" $WINE_PPA
+	sudo apt update -y;  clear
 	sudo apt install -y --install-recommends winehq-stable
 
 	HEAVY_PKGS=$(GET_PACKAGES apt_heavy)
