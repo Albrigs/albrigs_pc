@@ -20,7 +20,7 @@ PPA_EXISTS() #remove trecho de loop se ppa já estiver instalado
 
 APT_INSTALL()
 {
-	clear;  if ! dpkg -l | grep -q $1; then sudo apt -f -y install $1; fi
+	clear;  if ! dpkg -l | grep -q $1; then sudo apt -f -y -qq install $1; fi
 }
 
 PKG_IN_APT()
@@ -97,8 +97,8 @@ fi
 
 #arquitetura 32 bits
 sudo dpkg --add-architecture i386
-sudo apt update; sudo apt upgrade
-sudo apt --fix-broken install
+sudo apt update -y -qq; sudo apt upgrade -y -qq
+sudo apt --fix-broken install -qq
 clear
 
 
@@ -172,8 +172,8 @@ if [ $ROOT_SIZE -gt 100 ]; then
 	# Se meu root for maior vai instalar pacotes pesados
 	WINE_PPA="deb https://dl.winehq.org/wine-builds/ubuntu/ ${VERSION} main"
 	ADD_APT_PKG 'winehq' "https://dl.winehq.org/wine-builds/winehq.key" $WINE_PPA
-	sudo apt update -y;  clear
-	sudo apt install -y --install-recommends winehq-stable
+	sudo apt update -y -qq;
+	sudo apt install -y -qq --install-recommends winehq-stable
 
 	HEAVY_PKGS=$(GET_PACKAGES apt_heavy)
 	for e in ${HEAVY_PKGS}; do APT_INSTALL $e; done
