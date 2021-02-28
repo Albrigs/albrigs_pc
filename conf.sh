@@ -49,14 +49,14 @@ GDEBI_INSTALL()
 }
 
 PROJECT_URL="https://raw.githubusercontent.com/Albrigs/albrigs_pc/main/"
-PACKAGES_URL="pkgs.json"
+PACKAGES_URL="${PROJECT_URL}pkgs.json"
 
-PACKAGES=$(curl $PACKAGES_URL)
+PACKAGES=$(curl -sS $PACKAGES_URL)
 wait $!
 
 GET_PACKAGES()
 {
-	jq $1 $PACKAGES | jq '.[]' | sed 's/"//g'
+	echo $PACKAGES | jq $1 | jq '.[]' | sed 's/"//g'
 	return
 }
 
