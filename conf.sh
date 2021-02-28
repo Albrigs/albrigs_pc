@@ -23,6 +23,10 @@ APT_INSTALL()
 	clear;  if ! dpkg -l | grep -q $1; then sudo apt -f -y -qq install $1; fi
 }
 
+
+APT_INSTALL jq
+APT_INSTALL sed
+
 PKG_IN_APT()
 {
 	HAS =$(apt search $1)
@@ -45,13 +49,14 @@ GDEBI_INSTALL()
 }
 
 PROJECT_URL="https://raw.githubusercontent.com/Albrigs/albrigs_pc/main/"
-PACKAGES_URL="${PROJECT_URL}pkgs/"
+PACKAGES_URL="pkgs.json"
+
+PACKAGES=$(curl $PACKAGES_URL)
+wait $!
 
 GET_PACKAGES()
 {
-	RESPONSE=$(curl -sS "${PACKAGES_URL}${1}")
-	wait $!
-	echo $RESPONSE
+	jq $1 $PACKAGES | jq '.[]' | sed 's/"//g'
 	return
 }
 
@@ -103,10 +108,10 @@ clear
 
 
 #PACOTES
-APT_PKGS=$({ GET_PACKAGES apt_basic & GET_PACKAGES apt_net & GET_PACKAGES apt_media & GET_PACKAGES apt_dev; })
-PIP_PKGS=$(GET_PACKAGES pip)
-NPM_PKGS=$(GET_PACKAGES npm)
-FLATHUB_PKGS=$(GET_PACKAGES flathub)
+APT_PKGS=$( GET_PACKAGES '.apt')
+PIP_PKGS=$(GET_PACKAGES '.pip')
+NPM_PKGS=$(GET_PACKAGES '.npm')
+FLATHUB_PKGS=$(GET_PACKAGES '.flathub')
 
 
 for e in ${APT_PKGS[@]}; APT_INSTALL $e; done
@@ -175,6 +180,6 @@ if [ $ROOT_SIZE -gt 100 ]; then
 	sudo apt update -y -qq;
 	sudo apt install -y -qq --install-recommends winehq-stable
 
-	HEAVY_PKGS=$(GET_PACKAGES apt_heavy)
+	HEAVY_PKGS=$(GET_PACKAGES '.heavy')
 	for e in ${HEAVY_PKGS}; do APT_INSTALL $e; done
 fi

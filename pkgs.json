@@ -1,0 +1,42 @@
+{
+	"apt": [
+			"gdebi", "flathub", "ppa-purge",
+			"wmctrl", "xdotool",
+			"xclip", "nano", "featherpad",
+			"gufw", "clamav",
+			"xz-utils", "unzip",
+			"font-manager", "bash", "stacer",
+
+			"jupyter-notebook",
+			"insomnia", "sqlitebrowser",
+			"nodejs", "python3.8", "default-jdk","openjdk-8-jdk", "python", "lua",
+			"python3-pip", "python-pip", "npm",
+			"love",
+			"git",
+
+			"ffmpeg",
+			"okular",
+			"audacity", "dia", "krita",
+
+			"transmission", "apt-transport-https", "preload", "wget",
+			"firefox",
+			"putty",
+			"telegram-desktop", "discord", "thunderbird"
+
+
+	],
+	"flathub": [
+		"com.github.libresprite.LibreSprite", 
+		"com.github.marktext.marktext"
+	],
+	"npm":[
+		"npx",
+		"nextron"
+	],
+	"pip":[
+		"pyinstaller", "virtualenv", "jupyterthemes"
+	],
+	"heavy":[
+		"sublime-text", "retroarch", "spotify-client", "libreoffice", "lutris", "steam"
+	]
+}
