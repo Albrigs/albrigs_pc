@@ -11,8 +11,10 @@ then
 fi
 
 
-PPA_EXISTS() #remove trecho de loop se ppa já estiver instalado
+PPA_EXISTS()
 {
+	#Remove trecho de loop se ppa já estiver instalado
+	#$1 : ppa
 	apt policy | grep $1
 	wait $!
 	if [ $? != 0 ]; then continue ; fi
@@ -20,15 +22,19 @@ PPA_EXISTS() #remove trecho de loop se ppa já estiver instalado
 
 APT_INSTALL()
 {
+	#Instala um pacote via APT caso ele ainda nao tenha sido instalado
+	#$1 : nome do pacote
 	clear;  if ! dpkg -l | grep -q $1; then sudo apt -f -y -qq install $1; fi
 }
 
-
+#pacotes fundamentias
 APT_INSTALL jq
 APT_INSTALL sed
 
 PKG_IN_APT()
 {
+	#Verifica se um pacote esta presente na busca do apt.
+	#$1 : nome do pacote
 	HAS =$(apt search $1)
 	wait $!
 	grep -w $1 $HAS
@@ -38,6 +44,8 @@ PKG_IN_APT()
 
 GDEBI_INSTALL()
 {
+	#Instala um pacote via gdebi caso ainda nao tenha sido instalado
+	#$1 : nome do pacote
 	which $1
 	if [ $? != 1 ]; then
 		DEB_PATH= "~/${1}.deb"
@@ -48,23 +56,29 @@ GDEBI_INSTALL()
 
 }
 
+#URLs importantes
 PROJECT_URL="https://raw.githubusercontent.com/Albrigs/albrigs_pc/main/"
 PACKAGES_URL="${PROJECT_URL}pkgs.json"
 
+#Pegando json com listas de pacotes a serem instalados
 PACKAGES=$(curl -sS $PACKAGES_URL)
 wait $!
 
+
 GET_PACKAGES()
 {
+	#Filtra json e retorna uma lista compativel com bash
+	#$1 : .nome_do_gerenciador_de_pacotes
 	echo $PACKAGES | jq $1 | jq '.[]' | sed 's/"//g'
 	return
 }
 
 ADD_APT_PKG()
 {
-	#1 = pkg name
-	#2 = URL key
-	#3 = URL of deb
+	#Adiciona pacote a lista de pacotes do apt
+	#1 : nome do pacote
+	#2 : URL da chave
+	#3 : URL do .deb
 	curl -sS $2 | sudo tee "/etc/apt/sources.list.d/${1}.list"
 	echo "deb ${3}" | sudo apt-key add - 
 }
@@ -130,15 +144,15 @@ GDEBI_INSTALL "min" "https://github.com/minbrowser/min/releases/download/v1.17.1
 sudo curl -fsSL https://deno.land/x/install/install.sh | sh; clear
 
 
-#Adicionando shells que serão carregados no login.
-#TODO Adicionar
-SH_URLS=(
+#Adicionando scripts que serão carregados no login.
+SH_LOGIN=(
  "${PROJECT_URL}login_files/custom_path.sh"
 )
 if [ -d /etc/profile.d ]; then
-	for e in ${SH_URLS[@]};do clear; sudo wget -P /etc/profile.d $e; done
+	for e in ${SH_LOGIN[@]};do clear; sudo wget -P /etc/profile.d $e; done
 fi
 
+#Adicionando scripts que executam comandos no terminal
 COMMAND_URL="${PROJECT_URL}command_files/"
 SH_COMMANDS=(
 	"${COMMAND_URL}update_all"
