@@ -143,6 +143,10 @@ GDEBI_INSTALL "min" "https://github.com/minbrowser/min/releases/download/v1.17.1
 #DENO
 sudo curl -fsSL https://deno.land/x/install/install.sh | sh; clear
 
+#Node version manager
+sudo curl -sS https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh | bash
+
+
 
 #Adicionando scripts que serão carregados no login.
 SH_LOGIN=(

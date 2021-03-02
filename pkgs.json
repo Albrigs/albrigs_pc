@@ -9,7 +9,7 @@
 
 			"jupyter-notebook",
 			"insomnia", "sqlitebrowser",
-			"nodejs", "python3.8", "default-jdk","openjdk-8-jdk", "python", "lua",
+			"python3.8", "default-jdk","openjdk-8-jdk", "python", "lua",
 			"python3-pip", "python-pip", "npm",
 			"love",
 			"git",
@@ -31,7 +31,8 @@
 	],
 	"npm":[
 		"npx",
-		"nextron"
+		"nextron",
+		"nvm"
 	],
 	"pip":[
 		"pyinstaller", "virtualenv", "jupyterthemes"
