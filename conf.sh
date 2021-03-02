@@ -201,3 +201,6 @@ if [ $ROOT_SIZE -gt 100 ]; then
 	HEAVY_PKGS=$(GET_PACKAGES '.heavy')
 	for e in ${HEAVY_PKGS}; do APT_INSTALL $e; done
 fi
+
+# Ajustaodn quantidade de watches
+echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
