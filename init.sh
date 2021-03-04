@@ -8,12 +8,17 @@ if [ $is_online != 0 ]; then echo "You are offline, this script will not work.";
 #URLs Base
 PROJECT_URL="https://raw.githubusercontent.com/Albrigs/albrigs_pc/main/"
 PACKAGES_URL="${PROJECT_URL}pkgs.yaml"
+CONFIG_URL="${PROJECT_URL}base.yaml"
 LOGINS_URL="${PROJECT_URL}login_files/"
 COMMAND_URL="${PROJECT_URL}command_files/"
 
 #Infos basicas do sistema
 ROOT_SIZE=$(df | grep "/$" | cut -d " " -f 3)
 ROOT_SIZE=$(echo $(($ROOT_SIZE/1000000)))
+
+#Pegando infos base
+PACKAGES=$(curl -sS $PACKAGES_URL); wait $!
+CONFIG=$(curl -sS $CONFIG_URL); wait $!
 
 
 PPA_EXISTS()
@@ -37,7 +42,7 @@ PKG_IN_APT()
 {
 	#Verifica se um pacote esta presente na busca do apt.
 	#$1 : nome do pacote
-	HAS =$(apt search $1); wait $!
+	HAS=$(apt search $1); wait $!
 	grep -w $1 $HAS
 	echo $?
 	return
@@ -61,10 +66,9 @@ GDEBI_INSTALL()
 
 GET_PACKAGES()
 {
-	#Filtra json e retorna uma lista compativel com bash
-	#$1 : .nome_do_gerenciador_de_pacotes
-	echo $PACKAGES | yq r - $1
-	return
+	#Filtra yml e retorna uma lista compativel com bash
+	#$1 : atributo
+	echo $PACKAGES | yq r - $1; return
 }
 
 
@@ -79,40 +83,20 @@ ADD_APT_PKG()
 }
 
 
+SH_INSTALL()
+{
+	#Instala pacote atraves de um SH online
+	#1 : url do script
+	sudo curl -sS $1 | bash
+}
+
+
 # Tirando travas do apt
-sudo rm /var/lib/dpkg/lock-frontend
-sudo rm /var/cache/apt/archives/lock
+sudo rm /var/lib/dpkg/lock-frontend; sudo rm /var/cache/apt/archives/lock
 sudo apt-key adv --recv-key --keyserver keyserver.ubuntu.com 241FE6973B765FAE
-
-
-#Repositórios não nativos
+# Repositórios não nativos
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CC86BB64
-
-PPAS=("webupd8team/atom" "lutris-team/lutris" "oguzhaninan/stacer" "rmescandon/yq")
-for e in ${PPAS[@]}; do clear;  PPA_EXISTS $e; sudo sudo add-apt-repository ppa:${e}; done
-
-
-#Spotfy
-if [ "$(PKG_IN_APT spotify)" != 0 ]; then
-	ADD_APT_PKG 'spotify' 'https://download.spotify.com/debian/pubkey_0D811D58.gpg' 'http://repository.spotify.com stable non-free'
-fi
-
-#Sublime Text
-if [ "$(PKG_IN_APT sublime-text)" != 0 ] then
-	ADD_APT_PKG 'sublime-text' 'https://download.sublimetext.com/sublimehq-pub.gpg' 'https://download.sublimetext.com/ apt/stable/'
-fi
-
-#Insomnia
-if [ "$(PKG_IN_APT insomnia)" != 0 ] then
-	ADD_APT_PKG 'insomnia' 'https://insomnia.rest/keys/debian-public.key.asc' 'https://dl.bintray.com/getinsomnia/Insomnia /'
-fi
-
-
-##
-#if [ "$(PKG_IN_APT )" != 0 ] then
-#fi
-
-#arquitetura 32 bits
+# Arquitetura 32 bits
 sudo dpkg --add-architecture i386
 sudo apt update -y -qq; sudo apt upgrade -y -qq
 sudo apt --fix-broken install -qq
@@ -121,66 +105,63 @@ clear
 #pacotes fundamentias
 APT_INSTALL yq
 
-#Pegando json com listas de pacotes a serem instalados
-PACKAGES=$(curl -sS $PACKAGES_URL)
-wait $!
+
+PPAS=$(echo $CONFIG | yq r - ppa)
+for e in ${PPAS[@]}; do clear;  PPA_EXISTS $e; sudo sudo add-apt-repository ppa:${e}; done
+
+
+NUM_EXT_REPOS=$(echo $CONFIG | yq - -l external_repos)
+for i in $(seq 1 $NUM_EXT_REPOS); do
+	TMP_NAME=$(echo $CONFIG | yq - external_repos[$i].name)
+	TMP_KEY=$(echo $CONFIG | yq - external_repos[$i].key)
+	TMP_URL=$(echo $CONFIG | yq - external_repos[$i].url)
+
+	if [ "$(PKG_IN_APT "${TMP_NAME}")" != 0 ]; then
+		ADD_APT_PKG "${TMP_NAME}" "${TMP_KEY}" "${TMP_URL}"
+	fi
+done
 
 
 #PACOTES
-APT_PKGS=$( GET_PACKAGES 'apt')
+APT_PKGS=$(GET_PACKAGES 'apt')
 PIP_PKGS=$(GET_PACKAGES 'pip')
 NPM_PKGS=$(GET_PACKAGES 'npm')
 FLATHUB_PKGS=$(GET_PACKAGES 'flathub')
 
 
-for e in ${APT_PKGS[@]}; APT_INSTALL $e; done
+for e in ${APT_PKGS[@]}; do APT_INSTALL $e; done
 for e in ${PIP_PKGS[@]}; do clear; sudo pip3 install $e; done
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo; clear
 for e in ${FLATHUB_PKGS[@]}; do clear; flatpak install -y flathub $e; done
 for e in ${NPM_PKGS[@]}; do clear; sudo npm i -g $e; done; clear
 
-#Discord
-GDEBI_INSTALL "discord" "https://discordapp.com/api/download?platform=linux&format=deb"
 
-#navegador min
-GDEBI_INSTALL "min" "https://github.com/minbrowser/min/releases/download/v1.17.1/min_1.17.1_amd64.deb"
+NUM_GDEBI_REPOS=$(echo $CONFIG | yq - -l gdebi_software)
+for i in $(seq 1 $NUM_GDEBI_REPOS); do
+	TMP_NAME=$(echo $CONFIG | yq - gdebi_software[$i].name)
+	TMP_URL=$(echo $CONFIG | yq - gdebi_software[$i].url)
 
-#DENO
-sudo curl -fsSL https://deno.land/x/install/install.sh | sh; clear
+	GDEBI_INSTALL $TMP_NAME $TMP_URL
+done
 
-#Node version manager
-sudo curl -sS https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh | bash
 
+SH_INSTALL_URL=$(echo $CONFIG | yq - sh_install)
+for e in ${SH_INSTALL_URL[@]}; do SH_INSTALL $e; done
 
 
 #Adicionando scripts que serão carregados no login.
-SH_LOGIN=(
-	custom_path.sh
-)
+SH_LOGIN=$(echo $CONFIG | yq r - sh_login)
 if [ -d /etc/profile.d ]; then
 	for e in ${SH_LOGIN[@]};do clear; sudo wget -P /etc/profile.d "${LOGINS_URL}${e}"; done
 fi
 
 #Adicionando scripts que executam comandos no terminal
-SH_COMMANDS=(
-	update_all
-	clear_all
-	killwindows
-	turnoffpc
-	set_mode
-)
+SH_COMMANDS=$(echo $CONFIG | yq r - sh_commands)
 if [ -d /usr/bin ]; then
 	for e in ${SH_COMMANDS[@]};do
-		clear
-		sudo wget -P /usr/bin "${COMMAND_URL}${e}";
-		sudo chmod -x "/usr/bin/${e}"
+		clear; sudo wget -P /usr/bin "${COMMAND_URL}${e}"; sudo chmod -x "/usr/bin/${e}"
 	done
 fi
-
-
-#escolhendo versões padrão quando há alternativas
-ALTS=( "java" "python" "pip" "x-www-browser" )
-for e in ${ALTS[@]}; do clear; sudo update-alternatives --config $e; done
 
 
 #Meu GYT
@@ -202,9 +183,14 @@ if [ $ROOT_SIZE -gt 100 ]; then
 	sudo apt update -y -qq;
 	sudo apt install -y -qq --install-recommends winehq-stable
 
-	HEAVY_PKGS=$(GET_PACKAGES '.heavy')
+	HEAVY_PKGS=$(GET_PACKAGES 'heavy')
 	for e in ${HEAVY_PKGS}; do APT_INSTALL $e; done
 fi
 
 # Ajustaodn quantidade de watches
 echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+
+
+#escolhendo versões padrão quando há alternativas
+ALTS=$(echo $CONFIG | yq r - alternatives)
+for e in ${ALTS[@]}; do clear; sudo update-alternatives --config $e; done
