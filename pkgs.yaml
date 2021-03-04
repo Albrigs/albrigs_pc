@@ -1,3 +1,10 @@
+# Organizaçao dos arquivos que serao instalados organizados por gerenciador de pacotes
+# Informalmente arquivos instalados via apt estao organizados em:
+# Utilitarios
+# Desenvolvimento
+# Media
+# Web
+
 apt:
   gdebi
   flathub
