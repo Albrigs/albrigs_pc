@@ -1,3 +1,4 @@
+set -e
 #!/bin/bash
 
 #Script só inicia se estiver conectado a internet
@@ -19,6 +20,8 @@ ROOT_SIZE=$(echo $(($ROOT_SIZE/1000000)))
 #Pegando infos base
 PACKAGES=$(curl -sS $PACKAGES_URL); wait $!
 CONFIG=$(curl -sS $CONFIG_URL); wait $!
+
+
 
 
 PPA_EXISTS()
@@ -68,7 +71,8 @@ GET_PACKAGES()
 {
 	#Filtra yml e retorna uma lista compativel com bash
 	#$1 : atributo
-	echo $PACKAGES | yq r - $1; return
+	echo $PACKAGES | yq r - "${1}"
+	return
 }
 
 
@@ -106,15 +110,19 @@ clear
 APT_INSTALL yq
 
 
-PPAS=$(echo $CONFIG | yq r - ppa)
+PPAS=$(echo $CONFIG | yq r - ppa); wait $!;
+
+echo $PPAS
+exit
+
 for e in ${PPAS[@]}; do clear;  PPA_EXISTS $e; sudo sudo add-apt-repository ppa:${e}; done
 
 
-NUM_EXT_REPOS=$(echo $CONFIG | yq - -l external_repos)
+NUM_EXT_REPOS=$(echo $CONFIG | yq r - external_repos -l)
 for i in $(seq 1 $NUM_EXT_REPOS); do
-	TMP_NAME=$(echo $CONFIG | yq - external_repos[$i].name)
-	TMP_KEY=$(echo $CONFIG | yq - external_repos[$i].key)
-	TMP_URL=$(echo $CONFIG | yq - external_repos[$i].url)
+	TMP_NAME=$(echo $CONFIG | yq r - external_repos[$i].name)
+	TMP_KEY=$(echo $CONFIG | yq r - external_repos[$i].key)
+	TMP_URL=$(echo $CONFIG | yq r - external_repos[$i].url)
 
 	if [ "$(PKG_IN_APT "${TMP_NAME}")" != 0 ]; then
 		ADD_APT_PKG "${TMP_NAME}" "${TMP_KEY}" "${TMP_URL}"
@@ -127,26 +135,24 @@ APT_PKGS=$(GET_PACKAGES 'apt')
 PIP_PKGS=$(GET_PACKAGES 'pip')
 NPM_PKGS=$(GET_PACKAGES 'npm')
 FLATHUB_PKGS=$(GET_PACKAGES 'flathub')
+NUM_GDEBI_REPOS=$(echo $CONFIG | yq r - gdebi_software -l)
+SH_INSTALL_URL=$(echo $CONFIG | yq r - sh_install)
 
 
-for e in ${APT_PKGS[@]}; do APT_INSTALL $e; done
+for e in ${APT_PKGS[@]}; do echo $e; APT_INSTALL $e; done
 for e in ${PIP_PKGS[@]}; do clear; sudo pip3 install $e; done
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo; clear
 for e in ${FLATHUB_PKGS[@]}; do clear; flatpak install -y flathub $e; done
 for e in ${NPM_PKGS[@]}; do clear; sudo npm i -g $e; done; clear
 
-
-NUM_GDEBI_REPOS=$(echo $CONFIG | yq - -l gdebi_software)
 for i in $(seq 1 $NUM_GDEBI_REPOS); do
-	TMP_NAME=$(echo $CONFIG | yq - gdebi_software[$i].name)
-	TMP_URL=$(echo $CONFIG | yq - gdebi_software[$i].url)
+	TMP_NAME=$(echo $CONFIG | yq r - gdebi_software[$i].name)
+	TMP_URL=$(echo $CONFIG | yq r - gdebi_software[$i].url)
 
 	GDEBI_INSTALL $TMP_NAME $TMP_URL
 done
 
-
-SH_INSTALL_URL=$(echo $CONFIG | yq - sh_install)
-for e in ${SH_INSTALL_URL[@]}; do SH_INSTALL $e; done
+for e in ${SH_INSTALL_URL[@]}; do echo 1; SH_INSTALL $e; done
 
 
 #Adicionando scripts que serão carregados no login.
@@ -168,7 +174,7 @@ fi
 if [ -f master.zip ]; then rm master.zip ; fi
 wget https://github.com/Albrigs/gyt/archive/master.zip
 unzip master.zip; rm master.zip
-sudo pip3 install e gyt-master
+sudo pip3 install e gyt-master/
 sudo rm -r gyt-master
 
 

@@ -1,37 +1,26 @@
-#ppas a adicionar
 ppa:
   webupd8team/atom
   lutris-team/lutris
   oguzhaninan/stacer
   rmescandon/yq
-
-#Escolhendo versões de programas que serão executados nos comandos base sem versao expressa
 alternatives:
   java
   python
   pip
   x-www-browser
-
-#Comandos personalizados
 sh_commands:
   update_all
   clear_all
   killwindows
   turnoffpc
   set_mode
-
-#Scripts executados na inicializaçao do sistema
 sh_login:
   custom_path.sh
-
-#Programas que sao instalados via deb baixado
 gdebi_software:
   - name: discord
     url: https://discordapp.com/api/download?platform=linux&format=deb
   - name: min
     url: https://github.com/minbrowser/min/releases/download/v1.17.1/min_1.17.1_amd64.deb
-
-#Repositorios externos que sao adicionados ao apt
 external_repos:
   - name: spotify
     url: http://repository.spotify.com stable non-free
@@ -42,8 +31,6 @@ external_repos:
   - name: insomnia
     url: https://dl.bintray.com/getinsomnia/Insomnia /
     key: https://insomnia.rest/keys/debian-public.key.asc
-
-#Arquivos instalados via ShellScript externo
 sh_install:
   https://deno.land/x/install/install.sh
   https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh
