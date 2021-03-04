@@ -20,6 +20,7 @@ PPA_EXISTS()
 	if [ $? != 0 ]; then continue ; fi
 }
 
+
 APT_INSTALL()
 {
 	#Instala um pacote via APT caso ele ainda nao tenha sido instalado
@@ -27,9 +28,6 @@ APT_INSTALL()
 	clear;  if ! dpkg -l | grep -q $1; then sudo apt -f -y -qq install $1; fi
 }
 
-#pacotes fundamentias
-APT_INSTALL jq
-APT_INSTALL sed
 
 PKG_IN_APT()
 {
@@ -39,8 +37,9 @@ PKG_IN_APT()
 	wait $!
 	grep -w $1 $HAS
 	echo $?
-	return	
+	return
 }
+
 
 GDEBI_INSTALL()
 {
@@ -50,28 +49,21 @@ GDEBI_INSTALL()
 	if [ $? != 1 ]; then
 		DEB_PATH= "~/${1}.deb"
 		wget -O  $DEB_PATH $2
-		sudo gdebi -n $DEB_PATH 
+		sudo gdebi -n $DEB_PATH
 		sudo rm -r $DEB_PATH
 	fi
 
 }
-
-#URLs importantes
-PROJECT_URL="https://raw.githubusercontent.com/Albrigs/albrigs_pc/main/"
-PACKAGES_URL="${PROJECT_URL}pkgs.json"
-
-#Pegando json com listas de pacotes a serem instalados
-PACKAGES=$(curl -sS $PACKAGES_URL)
-wait $!
 
 
 GET_PACKAGES()
 {
 	#Filtra json e retorna uma lista compativel com bash
 	#$1 : .nome_do_gerenciador_de_pacotes
-	echo $PACKAGES | jq $1 | jq '.[]' | sed 's/"//g'
+	echo $PACKAGES | yq r - $1
 	return
 }
+
 
 ADD_APT_PKG()
 {
@@ -80,7 +72,7 @@ ADD_APT_PKG()
 	#2 : URL da chave
 	#3 : URL do .deb
 	curl -sS $2 | sudo tee "/etc/apt/sources.list.d/${1}.list"
-	echo "deb ${3}" | sudo apt-key add - 
+	echo "deb ${3}" | sudo apt-key add -
 }
 
 
@@ -91,8 +83,11 @@ sudo apt-key adv --recv-key --keyserver keyserver.ubuntu.com 241FE6973B765FAE
 
 
 #Repositórios não nativos
-PPAS=("webupd8team/atom" "lutris-team/lutris" "oguzhaninan/stacer")
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CC86BB64
+
+PPAS=("webupd8team/atom" "lutris-team/lutris" "oguzhaninan/stacer" "rmescandon/yq")
 for e in ${PPAS[@]}; do clear;  PPA_EXISTS $e; sudo sudo add-apt-repository ppa:${e}; done 
+
 
 #Spotfy
 if [ "$(PKG_IN_APT spotify)" != 0 ]; then
@@ -102,12 +97,12 @@ fi
 #Sublime Text
 if [ "$(PKG_IN_APT sublime-text)" != 0 ] then
 	ADD_APT_PKG 'sublime-text' 'https://download.sublimetext.com/sublimehq-pub.gpg' 'https://download.sublimetext.com/ apt/stable/'
-fi 
+fi
 
 #Insomnia
 if [ "$(PKG_IN_APT insomnia)" != 0 ] then
 	ADD_APT_PKG 'insomnia' 'https://insomnia.rest/keys/debian-public.key.asc' 'https://dl.bintray.com/getinsomnia/Insomnia /'
-fi 
+fi
 
 
 ##
@@ -120,12 +115,25 @@ sudo apt update -y -qq; sudo apt upgrade -y -qq
 sudo apt --fix-broken install -qq
 clear
 
+#pacotes fundamentias
+APT_INSTALL yq
+APT_INSTALL sed
+
+
+#URLs importantes
+PROJECT_URL="https://raw.githubusercontent.com/Albrigs/albrigs_pc/main/"
+PACKAGES_URL="${PROJECT_URL}pkgs.yaml"
+
+#Pegando json com listas de pacotes a serem instalados
+PACKAGES=$(curl -sS $PACKAGES_URL)
+wait $!
+
 
 #PACOTES
-APT_PKGS=$( GET_PACKAGES '.apt')
-PIP_PKGS=$(GET_PACKAGES '.pip')
-NPM_PKGS=$(GET_PACKAGES '.npm')
-FLATHUB_PKGS=$(GET_PACKAGES '.flathub')
+APT_PKGS=$( GET_PACKAGES 'apt')
+PIP_PKGS=$(GET_PACKAGES 'pip')
+NPM_PKGS=$(GET_PACKAGES 'npm')
+FLATHUB_PKGS=$(GET_PACKAGES 'flathub')
 
 
 for e in ${APT_PKGS[@]}; APT_INSTALL $e; done
