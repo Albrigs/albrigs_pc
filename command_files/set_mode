@@ -37,7 +37,7 @@ tormenta_time(){
 		okular $T20
 
 		sleep 2
-		
+
 		xdotool set_desktop 0
 		firefox 'https://roll20.net/'
 
@@ -92,9 +92,9 @@ drawn_time(){
 	xdotool set_desktop 1
 	open_if_not_open spotify
 	firefox
-	
+
 	sleep 2
-	
+
 	xdotool set_desktop 0
 }
 

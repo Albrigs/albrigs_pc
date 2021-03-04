@@ -2,21 +2,25 @@
 
 #Script só inicia se estiver conectado a internet
 is_online=$(ping -c 1 -q 8.8.8.8 >&/dev/null; echo $?)
+if [ $is_online != 0 ]; then echo "You are offline, this script will not work."; exit; fi
 
+#Variaveis do Script
+#URLs Base
+PROJECT_URL="https://raw.githubusercontent.com/Albrigs/albrigs_pc/main/"
+PACKAGES_URL="${PROJECT_URL}pkgs.yaml"
+LOGINS_URL="${PROJECT_URL}login_files/"
+COMMAND_URL="${PROJECT_URL}command_files/"
 
-if [ $is_online != 0 ]
-then
-	echo "You are offline, this script will not work."
-	exit
-fi
+#Infos basicas do sistema
+ROOT_SIZE=$(df | grep "/$" | cut -d " " -f 3)
+ROOT_SIZE=$(echo $(($ROOT_SIZE/1000000)))
 
 
 PPA_EXISTS()
 {
 	#Remove trecho de loop se ppa já estiver instalado
 	#$1 : ppa
-	apt policy | grep $1
-	wait $!
+	apt policy | grep $1; wait $!
 	if [ $? != 0 ]; then continue ; fi
 }
 
@@ -33,8 +37,7 @@ PKG_IN_APT()
 {
 	#Verifica se um pacote esta presente na busca do apt.
 	#$1 : nome do pacote
-	HAS =$(apt search $1)
-	wait $!
+	HAS =$(apt search $1); wait $!
 	grep -w $1 $HAS
 	echo $?
 	return
@@ -48,7 +51,7 @@ GDEBI_INSTALL()
 	which $1
 	if [ $? != 1 ]; then
 		DEB_PATH= "~/${1}.deb"
-		wget -O  $DEB_PATH $2
+		wget -O  $DEB_PATH $2; wait $!
 		sudo gdebi -n $DEB_PATH
 		sudo rm -r $DEB_PATH
 	fi
@@ -86,7 +89,7 @@ sudo apt-key adv --recv-key --keyserver keyserver.ubuntu.com 241FE6973B765FAE
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CC86BB64
 
 PPAS=("webupd8team/atom" "lutris-team/lutris" "oguzhaninan/stacer" "rmescandon/yq")
-for e in ${PPAS[@]}; do clear;  PPA_EXISTS $e; sudo sudo add-apt-repository ppa:${e}; done 
+for e in ${PPAS[@]}; do clear;  PPA_EXISTS $e; sudo sudo add-apt-repository ppa:${e}; done
 
 
 #Spotfy
@@ -117,12 +120,6 @@ clear
 
 #pacotes fundamentias
 APT_INSTALL yq
-APT_INSTALL sed
-
-
-#URLs importantes
-PROJECT_URL="https://raw.githubusercontent.com/Albrigs/albrigs_pc/main/"
-PACKAGES_URL="${PROJECT_URL}pkgs.yaml"
 
 #Pegando json com listas de pacotes a serem instalados
 PACKAGES=$(curl -sS $PACKAGES_URL)
@@ -158,29 +155,28 @@ sudo curl -sS https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh | b
 
 #Adicionando scripts que serão carregados no login.
 SH_LOGIN=(
- "${PROJECT_URL}login_files/custom_path.sh"
+	custom_path.sh
 )
 if [ -d /etc/profile.d ]; then
-	for e in ${SH_LOGIN[@]};do clear; sudo wget -P /etc/profile.d $e; done
+	for e in ${SH_LOGIN[@]};do clear; sudo wget -P /etc/profile.d "${LOGINS_URL}${e}"; done
 fi
 
 #Adicionando scripts que executam comandos no terminal
-COMMAND_URL="${PROJECT_URL}command_files/"
 SH_COMMANDS=(
-	"${COMMAND_URL}update_all"
-	"${COMMAND_URL}clear_all"
+	update_all
+	clear_all
+	killwindows
+	turnoffpc
+	set_mode
 )
 if [ -d /usr/bin ]; then
 	for e in ${SH_COMMANDS[@]};do
 		clear
-		sudo wget -P /usr/bin $e;
-		FILE_NAME=$(echo $e | cut -d "/" -f 8)
-		sudo chmod -x "/usr/bin/$FILE_NAME"
+		sudo wget -P /usr/bin "${COMMAND_URL}${e}";
+		sudo chmod -x "/usr/bin/${e}"
 	done
 fi
 
-#Alterar tema jupyter
-jt -t chesterish
 
 #escolhendo versões padrão quando há alternativas
 ALTS=( "java" "python" "pip" "x-www-browser" )
@@ -196,10 +192,10 @@ sudo rm -r gyt-master
 
 
 #Heavy thins
-ROOT_SIZE=$(df | grep "/$" | cut -d " " -f 3)
-ROOT_SIZE=$(echo $(($ROOT_SIZE/1000000)))
-
 if [ $ROOT_SIZE -gt 100 ]; then
+	#Alterar tema jupyter
+	jt -t chesterish
+
 	# Se meu root for maior vai instalar pacotes pesados
 	WINE_PPA="deb https://dl.winehq.org/wine-builds/ubuntu/ ${VERSION} main"
 	ADD_APT_PKG 'winehq' "https://dl.winehq.org/wine-builds/winehq.key" $WINE_PPA

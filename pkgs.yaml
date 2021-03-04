@@ -1,4 +1,3 @@
-
 apt:
   gdebi
   flathub
@@ -15,6 +14,7 @@ apt:
   font-manager
   stacer
   jq
+  sed
   sublime-text
   insomnia
   sqlitebrowser
