@@ -1,4 +1,3 @@
-set -e
 #!/bin/bash
 
 #Script só inicia se estiver conectado a internet
@@ -8,7 +7,6 @@ if [ $is_online != 0 ]; then echo "You are offline, this script will not work.";
 #Variaveis do Script
 #URLs Base
 PROJECT_URL="https://raw.githubusercontent.com/Albrigs/albrigs_pc/main/"
-PACKAGES_URL="${PROJECT_URL}pkgs.yaml"
 CONFIG_URL="${PROJECT_URL}base.yaml"
 LOGINS_URL="${PROJECT_URL}login_files/"
 COMMAND_URL="${PROJECT_URL}command_files/"
@@ -17,11 +15,7 @@ COMMAND_URL="${PROJECT_URL}command_files/"
 ROOT_SIZE=$(df | grep "/$" | cut -d " " -f 3)
 ROOT_SIZE=$(echo $(($ROOT_SIZE/1000000)))
 
-#Pegando infos base
-PACKAGES=$(curl -sS $PACKAGES_URL); wait $!
-CONFIG=$(curl -sS $CONFIG_URL); wait $!
-
-
+curl -sS $CONFIG_URL > base.yaml
 
 
 PPA_EXISTS()
@@ -67,11 +61,16 @@ GDEBI_INSTALL()
 }
 
 
-GET_PACKAGES()
-{
-	#Filtra yml e retorna uma lista compativel com bash
-	#$1 : atributo
-	echo $PACKAGES | yq r - "${1}"
+GET_CONFIG(){
+	TMP=$(yq r base.yaml "${1}")
+	echo $TMP
+	return
+}
+
+
+GET_CONFIG_LENGTH(){
+	TMP=$(yq r base.yaml "${1}" -l)
+	echo $TMP
 	return
 }
 
@@ -82,7 +81,7 @@ ADD_APT_PKG()
 	#1 : nome do pacote
 	#2 : URL da chave
 	#3 : URL do .deb
-	curl -sS $2 | sudo tee "/etc/apt/sources.list.d/${1}.list"
+	wget -qO $2 | sudo tee "/etc/apt/sources.list.d/${1}.list"
 	echo "deb ${3}" | sudo apt-key add -
 }
 
@@ -110,19 +109,17 @@ clear
 APT_INSTALL yq
 
 
-PPAS=$(echo $CONFIG | yq r - ppa); wait $!;
-
-echo $PPAS
-exit
-
-for e in ${PPAS[@]}; do clear;  PPA_EXISTS $e; sudo sudo add-apt-repository ppa:${e}; done
+PPAS=$(GET_CONFIG ppa);
 
 
-NUM_EXT_REPOS=$(echo $CONFIG | yq r - external_repos -l)
+for e in ${PPAS[@]}; do clear;  PPA_EXISTS $e; sudo sudo add-apt-repository -y ppa:${e}; done
+
+
+NUM_EXT_REPOS=$(GET_CONFIG_LENGTH external_repos)
 for i in $(seq 1 $NUM_EXT_REPOS); do
-	TMP_NAME=$(echo $CONFIG | yq r - external_repos[$i].name)
-	TMP_KEY=$(echo $CONFIG | yq r - external_repos[$i].key)
-	TMP_URL=$(echo $CONFIG | yq r - external_repos[$i].url)
+	TMP_NAME=$(GET_CONFIG external_repos[$i].name)
+	TMP_KEY=$(GET_CONFIG external_repos[$i].key)
+	TMP_URL=$(GET_CONFIG external_repos[$i].url)
 
 	if [ "$(PKG_IN_APT "${TMP_NAME}")" != 0 ]; then
 		ADD_APT_PKG "${TMP_NAME}" "${TMP_KEY}" "${TMP_URL}"
@@ -131,12 +128,12 @@ done
 
 
 #PACOTES
-APT_PKGS=$(GET_PACKAGES 'apt')
-PIP_PKGS=$(GET_PACKAGES 'pip')
-NPM_PKGS=$(GET_PACKAGES 'npm')
-FLATHUB_PKGS=$(GET_PACKAGES 'flathub')
-NUM_GDEBI_REPOS=$(echo $CONFIG | yq r - gdebi_software -l)
-SH_INSTALL_URL=$(echo $CONFIG | yq r - sh_install)
+APT_PKGS=$(GET_CONFIG 'apt')
+PIP_PKGS=$(GET_CONFIG 'pip')
+NPM_PKGS=$(GET_CONFIG 'npm')
+FLATHUB_PKGS=$(GET_CONFIG 'flathub')
+NUM_GDEBI_REPOS=$(GET_CONFIG_LENGTH gdebi_software)
+SH_INSTALL_URL=$(GET_CONFIG sh_install)
 
 
 for e in ${APT_PKGS[@]}; do echo $e; APT_INSTALL $e; done
@@ -146,8 +143,8 @@ for e in ${FLATHUB_PKGS[@]}; do clear; flatpak install -y flathub $e; done
 for e in ${NPM_PKGS[@]}; do clear; sudo npm i -g $e; done; clear
 
 for i in $(seq 1 $NUM_GDEBI_REPOS); do
-	TMP_NAME=$(echo $CONFIG | yq r - gdebi_software[$i].name)
-	TMP_URL=$(echo $CONFIG | yq r - gdebi_software[$i].url)
+	TMP_NAME=$(GET_CONFIG gdebi_software[$i].name)
+	TMP_URL=$(GET_CONFIG gdebi_software[$i].url)
 
 	GDEBI_INSTALL $TMP_NAME $TMP_URL
 done
@@ -156,13 +153,13 @@ for e in ${SH_INSTALL_URL[@]}; do echo 1; SH_INSTALL $e; done
 
 
 #Adicionando scripts que serão carregados no login.
-SH_LOGIN=$(echo $CONFIG | yq r - sh_login)
+SH_LOGIN=$(GET_CONFIG sh_login)
 if [ -d /etc/profile.d ]; then
 	for e in ${SH_LOGIN[@]};do clear; sudo wget -P /etc/profile.d "${LOGINS_URL}${e}"; done
 fi
 
 #Adicionando scripts que executam comandos no terminal
-SH_COMMANDS=$(echo $CONFIG | yq r - sh_commands)
+SH_COMMANDS=$(GET_CONFIG sh_commands)
 if [ -d /usr/bin ]; then
 	for e in ${SH_COMMANDS[@]};do
 		clear; sudo wget -P /usr/bin "${COMMAND_URL}${e}"; sudo chmod -x "/usr/bin/${e}"
@@ -189,7 +186,7 @@ if [ $ROOT_SIZE -gt 100 ]; then
 	sudo apt update -y -qq;
 	sudo apt install -y -qq --install-recommends winehq-stable
 
-	HEAVY_PKGS=$(GET_PACKAGES 'heavy')
+	HEAVY_PKGS=$(GET_CONFIG 'heavy')
 	for e in ${HEAVY_PKGS}; do APT_INSTALL $e; done
 fi
 
@@ -198,5 +195,5 @@ echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo s
 
 
 #escolhendo versões padrão quando há alternativas
-ALTS=$(echo $CONFIG | yq r - alternatives)
+ALTS=$(GET_CONFIG alternatives)
 for e in ${ALTS[@]}; do clear; sudo update-alternatives --config $e; done

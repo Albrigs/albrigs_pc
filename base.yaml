@@ -34,3 +34,102 @@ external_repos:
 sh_install:
   https://deno.land/x/install/install.sh
   https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh
+ppa:
+  webupd8team/atom
+  lutris-team/lutris
+  oguzhaninan/stacer
+  rmescandon/yq
+alternatives:
+  java
+  python
+  pip
+  x-www-browser
+sh_commands:
+  update_all
+  clear_all
+  killwindows
+  turnoffpc
+  set_mode
+sh_login:
+  custom_path.sh
+gdebi_software:
+  - name: discord
+    url: https://discordapp.com/api/download?platform=linux&format=deb
+  - name: min
+    url: https://github.com/minbrowser/min/releases/download/v1.17.1/min_1.17.1_amd64.deb
+external_repos:
+  - name: spotify
+    url: http://repository.spotify.com stable non-free
+    key: https://download.spotify.com/debian/pubkey_0D811D58.gpg
+  - name: sublime-text
+    url: https://download.sublimetext.com/ apt/stable/
+    key: https://download.sublimetext.com/sublimehq-pub.gpg
+  - name: insomnia
+    url: https://dl.bintray.com/getinsomnia/Insomnia /
+    key: https://insomnia.rest/keys/debian-public.key.asc
+sh_install:
+  https://deno.land/x/install/install.sh
+  https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh
+apt:
+  gdebi
+  flathub
+  ppa-purge
+  wmctrl
+  xdotool
+  xclip
+  nano
+  featherpad
+  gufw
+  clamav
+  xz-utils
+  unzip
+  font-manager
+  stacer
+  jq
+  sed
+  sublime-text
+  insomnia
+  sqlitebrowser
+  python3.8
+  default-jdk
+  openjdk-8-jdk
+  python
+  lua
+  python3-pip
+  python-pip
+  npm
+  love
+  git
+  ffmpeg
+  okular
+  audacity
+  dia
+  krita
+  transmission
+  apt-transport-https
+  preload
+  wget
+  firefox
+  putty
+  telegram-desktop
+  discord
+  thunderbird
+flathub:
+  com.github.libresprite.LibreSprite
+  com.github.marktext.marktext
+npm:
+  npx
+  nextron
+  nvm
+pip:
+  pyinstaller
+  virtualenv
+  jupyterthemes
+heavy:
+  jupyter-notebook
+  retroarch
+  spotify-client
+  libreoffice
+  lutris
+  steam
+ 
