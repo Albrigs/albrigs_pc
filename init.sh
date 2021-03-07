@@ -27,14 +27,37 @@ PPA_EXISTS()
 	if [ $? != 0 ]; then continue ; fi
 }
 
-INSTALLED_PKGS=$(dpkg -l)
+INSTALLED_APT=$(dpkg -l)
 APT_INSTALL()
 {
 	#Instala um pacote via APT caso ele ainda nao tenha sido instalado
 	#$1 : nome do pacote
-	clear;  if ! echo $INSTALLED_PKGS | grep -q $1; then apt -f -y -qq install $1; fi
+	clear;  if ! echo $INSTALLED_APT | grep -q $1; then apt -f -y -qq install $1; fi
 }
 
+INSTALLED_NPM=$(npm list -g -depth=0)
+NPM_INSTALL()
+{
+	#Instala um pacote via NPM caso ele ainda nao tenha sido instalado
+	#$1 : nome do pacote
+	clear; if ! echo $INSTALLED_NPM | grep -q $1; then npm i --quiet -g $1; fi
+}
+
+INSTALLED_PIP=$(pip3 freeze)
+PIP_INSTALL()
+{
+	#Instala um pacote via PIP caso ele ainda nao tenha sido instalado
+	#$1 : nome do pacote
+	clear; if ! echo $INSTALLED_PIP | grep -q $1; then pip3 install -q $1; fi
+}
+
+INSTALLED_FLATPAK=$(flatpak list --app)
+FLATPAK_INSTALL()
+{
+	#Instala um pacote via FLATPAK caso ele ainda nao tenha sido instalado
+	#$1 : nome do pacote
+	clear; if ! echo $INSTALLED_FLATPAK | grep -q $1; then flatpak install -y flathub $1; fi
+}
 
 PKG_IN_APT()
 {
@@ -141,10 +164,10 @@ SH_INSTALL_URL=$(GET_CONFIG sh_install)
 
 
 for e in ${APT_PKGS[@]}; do echo $e; APT_INSTALL $e; done
-for e in ${PIP_PKGS[@]}; do clear; pip3 install $e; done
+for e in ${PIP_PKGS[@]}; do PIP_INSTALL $e; done
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo; clear
-for e in ${FLATHUB_PKGS[@]}; do clear; flatpak install -y flathub $e; done
-for e in ${NPM_PKGS[@]}; do clear; npm i -g $e; done; clear
+for e in ${FLATHUB_PKGS[@]}; do FLATPAK_INSTALL $e; done
+for e in ${NPM_PKGS[@]}; do NPM_INSTALL $e; done; clear
 
 for i in $(seq 1 $NUM_GDEBI_REPOS); do
 	i=$(expr $i - 1)
