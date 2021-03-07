@@ -72,7 +72,7 @@ sh_install:
   https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh
 apt:
   gdebi
-  flathub
+  flatpak
   ppa-purge
   wmctrl
   xdotool
