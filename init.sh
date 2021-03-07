@@ -35,7 +35,6 @@ APT_INSTALL()
 	clear;  if ! echo $INSTALLED_APT | grep -q $1; then apt -f -y -qq install $1; fi
 }
 
-INSTALLED_NPM=$(npm list -g -depth=0)
 NPM_INSTALL()
 {
 	#Instala um pacote via NPM caso ele ainda nao tenha sido instalado
@@ -43,7 +42,6 @@ NPM_INSTALL()
 	clear; if ! echo $INSTALLED_NPM | grep -q $1; then npm i --quiet -g $1; fi
 }
 
-INSTALLED_PIP=$(pip3 freeze)
 PIP_INSTALL()
 {
 	#Instala um pacote via PIP caso ele ainda nao tenha sido instalado
@@ -51,7 +49,6 @@ PIP_INSTALL()
 	clear; if ! echo $INSTALLED_PIP | grep -q $1; then pip3 install -q $1; fi
 }
 
-INSTALLED_FLATPAK=$(flatpak list --app)
 FLATPAK_INSTALL()
 {
 	#Instala um pacote via FLATPAK caso ele ainda nao tenha sido instalado
@@ -164,6 +161,13 @@ SH_INSTALL_URL=$(GET_CONFIG sh_install)
 
 
 for e in ${APT_PKGS[@]}; do echo $e; APT_INSTALL $e; done
+
+#Listagem de pacotes instalados
+INSTALLED_NPM=$(npm list -g -depth=0)
+INSTALLED_PIP=$(pip3 freeze)
+INSTALLED_FLATPAK=$(flatpak list --app)
+
+
 for e in ${PIP_PKGS[@]}; do PIP_INSTALL $e; done
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo; clear
 for e in ${FLATHUB_PKGS[@]}; do FLATPAK_INSTALL $e; done
