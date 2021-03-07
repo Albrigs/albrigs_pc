@@ -18,20 +18,21 @@ ROOT_SIZE=$(echo $(($ROOT_SIZE/1000000)))
 curl -sS $CONFIG_URL > base.yaml
 
 
+APT_POLICY=$(apt policy)
 PPA_EXISTS()
 {
 	#Remove trecho de loop se ppa já estiver instalado
 	#$1 : ppa
-	apt policy | grep $1; wait $!
+	echo $APT_POLICY | grep $1; wait $!
 	if [ $? != 0 ]; then continue ; fi
 }
 
-
+INSTALLED_PKGS=$(dpkg -l)
 APT_INSTALL()
 {
 	#Instala um pacote via APT caso ele ainda nao tenha sido instalado
 	#$1 : nome do pacote
-	clear;  if ! dpkg -l | grep -q $1; then apt -f -y -qq install $1; fi
+	clear;  if ! echo $INSTALLED_PKGS | grep -q $1; then apt -f -y -qq install $1; fi
 }
 
 
