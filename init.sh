@@ -83,6 +83,7 @@ ADD_APT_PKG()
 	#3 : URL do .deb
 	wget -qO $2 | sudo tee "/etc/apt/sources.list.d/${1}.list"
 	echo "deb ${3}" | sudo apt-key add -
+
 }
 
 
@@ -117,13 +118,15 @@ for e in ${PPAS[@]}; do clear;  PPA_EXISTS $e; sudo sudo add-apt-repository -y p
 
 NUM_EXT_REPOS=$(GET_CONFIG_LENGTH external_repos)
 for i in $(seq 1 $NUM_EXT_REPOS); do
+
+	i=$(expr $i - 1)
+
 	TMP_NAME=$(GET_CONFIG external_repos[$i].name)
 	TMP_KEY=$(GET_CONFIG external_repos[$i].key)
 	TMP_URL=$(GET_CONFIG external_repos[$i].url)
 
-	if [ "$(PKG_IN_APT "${TMP_NAME}")" != 0 ]; then
-		ADD_APT_PKG "${TMP_NAME}" "${TMP_KEY}" "${TMP_URL}"
-	fi
+	ADD_APT_PKG "${TMP_NAME}" "${TMP_KEY}" "${TMP_URL}"
+
 done
 
 
@@ -143,6 +146,7 @@ for e in ${FLATHUB_PKGS[@]}; do clear; flatpak install -y flathub $e; done
 for e in ${NPM_PKGS[@]}; do clear; sudo npm i -g $e; done; clear
 
 for i in $(seq 1 $NUM_GDEBI_REPOS); do
+	i=$(expr $i - 1)
 	TMP_NAME=$(GET_CONFIG gdebi_software[$i].name)
 	TMP_URL=$(GET_CONFIG gdebi_software[$i].url)
 
@@ -193,6 +197,7 @@ fi
 # Ajustaodn quantidade de watches
 echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
 
+sudo rm -r base.yaml
 
 #escolhendo versões padrão quando há alternativas
 ALTS=$(GET_CONFIG alternatives)
