@@ -31,7 +31,7 @@ APT_INSTALL()
 {
 	#Instala um pacote via APT caso ele ainda nao tenha sido instalado
 	#$1 : nome do pacote
-	clear;  if ! dpkg -l | grep -q $1; then sudo apt -f -y -qq install $1; fi
+	clear;  if ! dpkg -l | grep -q $1; then apt -f -y -qq install $1; fi
 }
 
 
@@ -54,8 +54,8 @@ GDEBI_INSTALL()
 	if [ $? != 1 ]; then
 		DEB_PATH= "~/${1}.deb"
 		wget -O  $DEB_PATH $2; wait $!
-		sudo gdebi -n $DEB_PATH
-		sudo rm -r $DEB_PATH
+		gdebi -n $DEB_PATH
+		rm -r $DEB_PATH
 	fi
 
 }
@@ -81,8 +81,8 @@ ADD_APT_PKG()
 	#1 : nome do pacote
 	#2 : URL da chave
 	#3 : URL do .deb
-	wget -qO $2 | sudo tee "/etc/apt/sources.list.d/${1}.list"
-	echo "deb ${3}" | sudo apt-key add -
+	wget -qO $2 | tee "/etc/apt/sources.list.d/${1}.list"
+	echo "deb ${3}" | apt-key add -
 
 }
 
@@ -91,19 +91,19 @@ SH_INSTALL()
 {
 	#Instala pacote atraves de um SH online
 	#1 : url do script
-	sudo curl -sS $1 | bash
+	curl -sS $1 | bash
 }
 
 
 # Tirando travas do apt
-sudo rm /var/lib/dpkg/lock-frontend; sudo rm /var/cache/apt/archives/lock
-sudo apt-key adv --recv-key --keyserver keyserver.ubuntu.com 241FE6973B765FAE
+rm /var/lib/dpkg/lock-frontend; rm /var/cache/apt/archives/lock
+apt-key adv --recv-key --keyserver keyserver.ubuntu.com 241FE6973B765FAE
 # Repositórios não nativos
-sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CC86BB64
+apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CC86BB64
 # Arquitetura 32 bits
-sudo dpkg --add-architecture i386
-sudo apt update -y -qq; sudo apt upgrade -y -qq
-sudo apt --fix-broken install -qq
+dpkg --add-architecture i386
+apt update -y -qq; apt upgrade -y -qq
+apt --fix-broken install -qq
 clear
 
 #pacotes fundamentias
@@ -113,7 +113,7 @@ APT_INSTALL yq
 PPAS=$(GET_CONFIG ppa);
 
 
-for e in ${PPAS[@]}; do clear;  PPA_EXISTS $e; sudo sudo add-apt-repository -y ppa:${e}; done
+for e in ${PPAS[@]}; do clear;  PPA_EXISTS $e; add-apt-repository -y ppa:${e}; done
 
 
 NUM_EXT_REPOS=$(GET_CONFIG_LENGTH external_repos)
@@ -140,10 +140,10 @@ SH_INSTALL_URL=$(GET_CONFIG sh_install)
 
 
 for e in ${APT_PKGS[@]}; do echo $e; APT_INSTALL $e; done
-for e in ${PIP_PKGS[@]}; do clear; sudo pip3 install $e; done
+for e in ${PIP_PKGS[@]}; do clear; pip3 install $e; done
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo; clear
 for e in ${FLATHUB_PKGS[@]}; do clear; flatpak install -y flathub $e; done
-for e in ${NPM_PKGS[@]}; do clear; sudo npm i -g $e; done; clear
+for e in ${NPM_PKGS[@]}; do clear; npm i -g $e; done; clear
 
 for i in $(seq 1 $NUM_GDEBI_REPOS); do
 	i=$(expr $i - 1)
@@ -159,14 +159,14 @@ for e in ${SH_INSTALL_URL[@]}; do echo 1; SH_INSTALL $e; done
 #Adicionando scripts que serão carregados no login.
 SH_LOGIN=$(GET_CONFIG sh_login)
 if [ -d /etc/profile.d ]; then
-	for e in ${SH_LOGIN[@]};do clear; sudo wget -P /etc/profile.d "${LOGINS_URL}${e}"; done
+	for e in ${SH_LOGIN[@]};do clear; wget -P /etc/profile.d "${LOGINS_URL}${e}"; done
 fi
 
 #Adicionando scripts que executam comandos no terminal
 SH_COMMANDS=$(GET_CONFIG sh_commands)
 if [ -d /usr/bin ]; then
 	for e in ${SH_COMMANDS[@]};do
-		clear; sudo wget -P /usr/bin "${COMMAND_URL}${e}"; sudo chmod -x "/usr/bin/${e}"
+		clear; wget -P /usr/bin "${COMMAND_URL}${e}"; chmod -x "/usr/bin/${e}"
 	done
 fi
 
@@ -175,8 +175,8 @@ fi
 if [ -f master.zip ]; then rm master.zip ; fi
 wget https://github.com/Albrigs/gyt/archive/master.zip
 unzip master.zip; rm master.zip
-sudo pip3 install e gyt-master/
-sudo rm -r gyt-master
+pip3 install e gyt-master/
+rm -r gyt-master
 
 
 #Heavy thins
@@ -187,18 +187,18 @@ if [ $ROOT_SIZE -gt 100 ]; then
 	# Se meu root for maior vai instalar pacotes pesados
 	WINE_PPA="deb https://dl.winehq.org/wine-builds/ubuntu/ ${VERSION} main"
 	ADD_APT_PKG 'winehq' "https://dl.winehq.org/wine-builds/winehq.key" $WINE_PPA
-	sudo apt update -y -qq;
-	sudo apt install -y -qq --install-recommends winehq-stable
+	apt update -y -qq;
+	apt install -y -qq --install-recommends winehq-stable
 
 	HEAVY_PKGS=$(GET_CONFIG 'heavy')
 	for e in ${HEAVY_PKGS}; do APT_INSTALL $e; done
 fi
 
 # Ajustaodn quantidade de watches
-echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+echo fs.inotify.max_user_watches=524288 | tee -a /etc/sysctl.conf && sysctl -p
 
-sudo rm -r base.yaml
+rm -r base.yaml
 
 #escolhendo versões padrão quando há alternativas
 ALTS=$(GET_CONFIG alternatives)
-for e in ${ALTS[@]}; do clear; sudo update-alternatives --config $e; done
+for e in ${ALTS[@]}; do clear; update-alternatives --config $e; done
