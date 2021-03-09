@@ -115,6 +115,13 @@ SH_INSTALL()
 	curl -sS $1 | bash
 }
 
+PIP_GIT_D_I(){
+	if [ -f master.zip ]; then rm master.zip ; fi
+	wget "https://github.com/Albrigs/${1}/archive/master.zip"
+	unzip master.zip; rm master.zip
+	pip3 install e "${1}-master/"
+	rm -r "${1}-master"
+}
 
 # Tirando travas do apt
 rm /var/lib/dpkg/lock-frontend; rm /var/cache/apt/archives/lock
@@ -158,6 +165,7 @@ NPM_PKGS=$(GET_CONFIG 'npm')
 FLATHUB_PKGS=$(GET_CONFIG 'flathub')
 NUM_GDEBI_REPOS=$(GET_CONFIG_LENGTH gdebi_software)
 SH_INSTALL_URL=$(GET_CONFIG sh_install)
+PIP_GIT=$(GET_CONFIG pip_git)
 
 
 for e in ${APT_PKGS[@]}; do echo $e; APT_INSTALL $e; done
@@ -181,6 +189,7 @@ for i in $(seq 1 $NUM_GDEBI_REPOS); do
 	GDEBI_INSTALL $TMP_NAME $TMP_URL
 done
 
+for e in ${PIP_GIT[@]}; do PIP_GIT_D_I $e; done
 for e in ${SH_INSTALL_URL[@]}; do echo 1; SH_INSTALL $e; done
 
 
@@ -198,13 +207,6 @@ if [ -d /usr/bin ]; then
 	done
 fi
 
-
-#Meu GYT
-if [ -f master.zip ]; then rm master.zip ; fi
-wget https://github.com/Albrigs/gyt/archive/master.zip
-unzip master.zip; rm master.zip
-pip3 install e gyt-master/
-rm -r gyt-master
 
 
 #Heavy thins
