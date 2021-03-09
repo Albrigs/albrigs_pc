@@ -4,6 +4,19 @@
 is_online=$(ping -c 1 -q 8.8.8.8 >&/dev/null; echo $?)
 if [ $is_online != 0 ]; then echo "You are offline, this script will not work."; exit; fi
 
+#Verificando se tem permissão para utilizar este diretório:
+PERMISSION=$(stat . | grep 'Access: (' | cut -d "(" -f 2 | cut -d "/" -f 1)
+if [ $PERMISSION -lt 700 ]; then
+	echo "You need permissions to write and read files in this folder"
+	exit
+fi
+
+#Verificando se roda em SUDO
+USER_LEVEL=$(id -u)
+if [ $USER_LEVEL != 0 ]; then echo "Please run as root (sudo)"; exit; fi
+
+
+
 #Variaveis do Script
 #URLs Base
 PROJECT_URL="https://raw.githubusercontent.com/Albrigs/albrigs_pc/main/"
