@@ -136,6 +136,8 @@ PIP_GIT_D_I(){
 	rm -r "${1}-master"
 }
 
+add-apt-repository -y ppa:rmescandon/yq
+
 # Tirando travas do apt
 rm /var/lib/dpkg/lock-frontend; rm /var/cache/apt/archives/lock
 apt-key adv --recv-key --keyserver keyserver.ubuntu.com 241FE6973B765FAE
@@ -148,6 +150,7 @@ apt --fix-broken install -qq
 clear
 
 #pacotes fundamentias
+
 APT_INSTALL yq
 
 
