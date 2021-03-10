@@ -242,6 +242,11 @@ echo fs.inotify.max_user_watches=524288 | tee -a /etc/sysctl.conf && sysctl -p
 
 rm -r base.yaml
 
+wget -q "${PROJECT_URL}subl_pkgs.txt"
+sublminer -r subl_pkgs.txt
+chmod 755 "${HOME}/.config/sublime-text-3/Packages/*"
+rm subl_pkgs.txt
+
 #escolhendo versões padrão quando há alternativas
 ALTS=$(GET_CONFIG alternatives)
 for e in ${ALTS[@]}; do clear; update-alternatives --config $e; done

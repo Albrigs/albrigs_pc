@@ -1,0 +1,27 @@
+Alignment
+All Autocomplete
+AutoFileName
+Babel
+BracketHighlighter
+Color Highlight
+Emmet
+Emmet Css Snippets
+FileIcons
+Handlebars
+JavaScript Completions
+JSHint
+JsPrettier
+LiveReload
+LoremIpsum
+Lua Love
+LuaAutocomplete
+Material Theme
+PackageResourceViewer
+React ES6 Snippets
+SFTP
+SideBarEnhancements
+SublimeLinter
+SublimePythonIDE
+Tabnine
+TodoReview
+TrailingSpaces
