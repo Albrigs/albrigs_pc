@@ -216,7 +216,7 @@ fi
 SH_COMMANDS=$(GET_CONFIG sh_commands)
 if [ -d /usr/bin ]; then
 	for e in ${SH_COMMANDS[@]};do
-		clear; wget -P /usr/bin "${COMMAND_URL}${e}"; chmod -x "/usr/bin/${e}"
+		clear; wget -P /usr/bin "${COMMAND_URL}${e}"; chmod 754 "/usr/bin/${e}"
 	done
 fi
 
