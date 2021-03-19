@@ -69,6 +69,7 @@ flathub:
   com.github.libresprite.LibreSprite
   com.github.marktext.marktext
   com.spotify.Client
+  net.bartkessels.getit
 npm:
   npx
   nextron
