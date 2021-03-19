@@ -109,18 +109,6 @@ GET_CONFIG_LENGTH(){
 }
 
 
-ADD_APT_PKG()
-{
-	#Adiciona pacote a lista de pacotes do apt
-	#1 : nome do pacote
-	#2 : URL da chave
-	#3 : URL do .deb
-	echo "deb ${3}" | tee "/etc/apt/sources.list.d/${1}.list"
-	wget -qO $2 | apt-key add -
-
-}
-
-
 SH_INSTALL()
 {
 	#Instala pacote atraves de um SH online
@@ -158,20 +146,6 @@ PPAS=$(GET_CONFIG ppa);
 
 
 for e in ${PPAS[@]}; do clear;  PPA_EXISTS $e; add-apt-repository -y ppa:${e}; done
-
-
-NUM_EXT_REPOS=$(GET_CONFIG_LENGTH external_repos)
-for i in $(seq 1 $NUM_EXT_REPOS); do
-
-	i=$(expr $i - 1)
-
-	TMP_NAME=$(GET_CONFIG external_repos[$i].name)
-	TMP_KEY=$(GET_CONFIG external_repos[$i].key)
-	TMP_URL=$(GET_CONFIG external_repos[$i].url)
-
-	ADD_APT_PKG "${TMP_NAME}" "${TMP_KEY}" "${TMP_URL}"
-
-done
 
 
 #PACOTES
