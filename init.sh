@@ -115,8 +115,8 @@ ADD_APT_PKG()
 	#1 : nome do pacote
 	#2 : URL da chave
 	#3 : URL do .deb
-	wget -qO $2 | tee "/etc/apt/sources.list.d/${1}.list"
-	echo "deb ${3}" | apt-key add -
+	echo "deb ${3}" | tee "/etc/apt/sources.list.d/${1}.list"
+	wget -qO $2 | apt-key add -
 
 }
 
@@ -244,11 +244,6 @@ fi
 echo fs.inotify.max_user_watches=524288 | tee -a /etc/sysctl.conf && sysctl -p
 
 rm -r base.yaml
-
-wget -q "${PROJECT_URL}subl_pkgs.txt"
-sublminer -r subl_pkgs.txt
-chmod 755 "${HOME}/.config/sublime-text-3/Packages/*"
-rm subl_pkgs.txt
 
 #escolhendo versões padrão quando há alternativas
 ALTS=$(GET_CONFIG alternatives)
