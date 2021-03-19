@@ -16,7 +16,6 @@ USER_LEVEL=$(id -u)
 if [ $USER_LEVEL != 0 ]; then echo "Please run as root (sudo)"; exit; fi
 
 
-
 #Variaveis do Script
 #URLs Base
 PROJECT_URL="https://raw.githubusercontent.com/Albrigs/albrigs_pc/main/"
@@ -91,7 +90,6 @@ GDEBI_INSTALL()
 		gdebi -n $DEB_PATH
 		rm -r $DEB_PATH
 	fi
-
 }
 
 
@@ -198,8 +196,17 @@ if [ -d /usr/bin ]; then
 fi
 
 
+#configurando nvim
+CONFIG_DIR=$HOME/.config
+wget -P $CONFIG_DIR https://github.com/Albrigs/nvim/archive/refs/heads/main.zip
 
-#Heavy thins
+unzip $CONFIG_DIR/main.zip -d CONFIG_DIR
+mv $CONFIG_DIR/nvim-main $CONFIG_DIR/nvim
+rm $CONFIG_DIR/main.zip
+nvim +PlugInstall +qall
+chmod -R 775 $CONFIG_DIR/nvim
+
+#Heavy things
 if [ $ROOT_SIZE -gt 100 ]; then
 	#Alterar tema jupyter
 	jt -t chesterish
